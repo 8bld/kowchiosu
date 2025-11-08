@@ -369,7 +369,7 @@ export default function CheatPanel() {
                           <div key={sub.id}>
                             {sub.type === "toggle" && (
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-gray-600">
+                                <span className="text-xs font-mono text-gray-300">
                                   {sub.label}
                                 </span>
                                 <div data-no-drag="true">
@@ -392,7 +392,7 @@ export default function CheatPanel() {
                             )}
                             {sub.type === "slider" && (
                               <div>
-                                <div className="text-xs font-medium text-gray-600 mb-1">
+                                <div className="text-xs font-mono text-gray-300 mb-1">
                                   {sub.label}
                                 </div>
                                 <Slider
@@ -411,7 +411,7 @@ export default function CheatPanel() {
                             )}
                             {sub.type === "color" && (
                               <div>
-                                <div className="text-xs font-medium text-gray-600 mb-2">
+                                <div className="text-xs font-mono text-gray-300 mb-2">
                                   {sub.label}
                                 </div>
                                 <div className="flex gap-2" data-no-drag="true">
@@ -429,9 +429,9 @@ export default function CheatPanel() {
                                         e.target.value
                                       )
                                     }
-                                    className="w-8 h-8 rounded cursor-pointer"
+                                    className="w-6 h-6 border border-gray-600 cursor-pointer"
                                   />
-                                  <span className="text-xs text-gray-500 flex items-center">
+                                  <span className="text-xs font-mono text-gray-400 flex items-center">
                                     {typeof sub.value === "string"
                                       ? sub.value
                                       : "#ff00ff"}
