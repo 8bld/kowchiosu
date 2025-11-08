@@ -94,16 +94,19 @@ function Slider({
   onChange: (val: number) => void;
 }) {
   return (
-    <div className="space-y-2" data-no-drag="true">
+    <div className="space-y-1" data-no-drag="true">
       <input
         type="range"
         min={min}
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-500"
+        className="w-full h-2 bg-gray-600 appearance-none cursor-pointer accent-green-500"
+        style={{
+          accentColor: "#10b981",
+        }}
       />
-      <div className="text-xs text-gray-600 text-right">{value}</div>
+      <div className="text-xs font-mono text-gray-400 text-right">{value}</div>
     </div>
   );
 }
