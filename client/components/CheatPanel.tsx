@@ -299,21 +299,27 @@ export default function CheatPanel() {
         <div className="flex gap-2">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 flex-shrink-0"
+            className="w-4 h-4 rounded-full bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
             data-no-drag="true"
-          />
+          >
+            <Minus size={10} className="text-yellow-700" />
+          </button>
           <button
             onClick={() => {
               // Fullscreen toggle
             }}
-            className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-300 transition-colors duration-200 flex-shrink-0"
+            className="w-4 h-4 rounded-full bg-green-400 hover:bg-green-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
             data-no-drag="true"
-          />
+          >
+            <Maximize2 size={10} className="text-green-700" />
+          </button>
           <button
             onClick={() => setIsVisible(false)}
-            className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-300 transition-colors duration-200 flex-shrink-0"
+            className="w-4 h-4 rounded-full bg-red-400 hover:bg-red-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
             data-no-drag="true"
-          />
+          >
+            <X size={10} className="text-red-700" />
+          </button>
         </div>
         <h2 className="text-sm font-bold text-white flex-1 text-center">Bryan GUI</h2>
         <div className="w-12" />
