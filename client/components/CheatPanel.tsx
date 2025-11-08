@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Minus, ChevronDown } from "lucide-react";
+import { X, Minus, ChevronDown, Maximize2 } from "lucide-react";
 
 interface FeatureToggle {
   id: string;
