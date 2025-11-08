@@ -243,46 +243,57 @@ export default function CheatPanel() {
             </button>
           </div>
         </div>
+        {/* Category Tabs */}
+        {!isMinimized && (
+          <div className="bg-gray-800 border-b border-gray-700 flex overflow-x-auto">
+            {categories.map((category, index) => (
+              <button
+                key={category.name}
+                onClick={() => setActiveCategory(index)}
+                className={`flex-1 px-3 py-2 text-xs font-bold transition-colors border-b-2 ${
+                  activeCategory === index
+                    ? "text-blue-300 border-b-blue-400 bg-gray-700/50"
+                    : "text-gray-400 border-b-transparent hover:text-gray-300"
+                }`}
+                data-no-drag="true"
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
         {!isMinimized && (
-          <div className="max-h-96 overflow-y-auto bg-gray-900">
-            <div className="divide-y divide-gray-700">
-              {categories.map((category) => (
-                <div key={category.name}>
-                  {/* Category Header */}
-                  <div className="bg-gray-800 px-2 py-1.5 border-b border-gray-700">
-                    <p className="text-xs font-bold text-blue-400 tracking-widest">
-                      [{category.name}]
-                    </p>
-                  </div>
-                  {/* Category Features */}
-                  {category.features.map((feature) => (
-                    <div
-                      key={feature.id}
-                      className="p-2 border-b border-gray-700 hover:bg-gray-800/50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span
-                          className={`text-xs font-mono ${
-                            feature.enabled
-                              ? "text-green-400"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {feature.label}
-                        </span>
-                        <div data-no-drag="true">
-                          <ToggleSwitch
-                            enabled={feature.enabled}
-                            onChange={() => toggleFeature(feature.id)}
-                          />
-                        </div>
+          <div className="max-h-80 overflow-y-auto bg-gray-900">
+            {categories[activeCategory] && (
+              <div className="divide-y divide-gray-700">
+                {categories[activeCategory].features.map((feature) => (
+                  <div
+                    key={feature.id}
+                    className="p-2 border-b border-gray-700 hover:bg-gray-800/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`text-xs font-mono ${
+                          feature.enabled
+                            ? "text-green-400"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {feature.label}
+                      </span>
+                      <div data-no-drag="true">
+                        <ToggleSwitch
+                          enabled={feature.enabled}
+                          onChange={() => toggleFeature(feature.id)}
+                        />
                       </div>
                     </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
