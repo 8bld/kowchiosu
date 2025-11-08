@@ -298,11 +298,13 @@ export default function CheatPanel() {
         )}
 
         {/* Footer Status */}
-        <div className="bg-gray-800 px-3 py-1 border-t border-gray-700">
-          <p className="text-xs font-mono text-blue-300">
-            [{activeCount}/{totalCount}] Active
-          </p>
-        </div>
+        {!isMinimized && (
+          <div className="bg-gray-800 px-3 py-1 border-t border-gray-700">
+            <p className="text-xs font-mono text-blue-300">
+              [{categories[activeCategory]?.features.filter((f) => f.enabled).length || 0}/{categories[activeCategory]?.features.length || 0}] {categories[activeCategory]?.name}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
