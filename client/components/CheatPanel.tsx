@@ -246,130 +246,39 @@ export default function CheatPanel() {
         {!isMinimized && (
           <div className="max-h-96 overflow-y-auto bg-gray-900">
             <div className="divide-y divide-gray-700">
-              {features.map((feature) => (
-                <div key={feature.id} className="p-2 border-b border-gray-700">
-                  {/* Main Toggle Row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 flex items-center gap-1">
-                      {feature.subFeatures && feature.subFeatures.length > 0 && (
-                        <button
-                          onClick={() => toggleExpanded(feature.id)}
-                          className="p-0 hover:text-blue-300 transition-colors"
-                          data-no-drag="true"
-                        >
-                          <ChevronDown
-                            size={14}
-                            className={`text-gray-400 transition-transform ${
-                              feature.expanded ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-                      )}
-                      {!feature.subFeatures ||
-                        (feature.subFeatures.length === 0 && (
-                          <div className="w-4" />
-                        ))}
-                      <span
-                        className={`text-xs font-mono ${
-                          feature.enabled
-                            ? "text-green-400"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {feature.label}
-                      </span>
-                    </div>
-                    <div data-no-drag="true">
-                      <ToggleSwitch
-                        enabled={feature.enabled}
-                        onChange={() => toggleFeature(feature.id)}
-                      />
-                    </div>
+              {categories.map((category) => (
+                <div key={category.name}>
+                  {/* Category Header */}
+                  <div className="bg-gray-800 px-2 py-1.5 border-b border-gray-700">
+                    <p className="text-xs font-bold text-blue-400 tracking-widest">
+                      [{category.name}]
+                    </p>
                   </div>
-
-                  {/* Sub Features */}
-                  {feature.expanded &&
-                    feature.subFeatures &&
-                    feature.subFeatures.length > 0 && (
-                      <div className="mt-2 ml-4 space-y-2 border-l border-gray-700 pl-2">
-                        {feature.subFeatures.map((sub) => (
-                          <div key={sub.id}>
-                            {sub.type === "toggle" && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-mono text-gray-300">
-                                  {sub.label}
-                                </span>
-                                <div data-no-drag="true">
-                                  <ToggleSwitch
-                                    enabled={
-                                      typeof sub.value === "boolean"
-                                        ? sub.value
-                                        : false
-                                    }
-                                    onChange={() =>
-                                      updateSubFeature(
-                                        feature.id,
-                                        sub.id,
-                                        !sub.value
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            )}
-                            {sub.type === "slider" && (
-                              <div>
-                                <div className="text-xs font-mono text-gray-300 mb-1">
-                                  {sub.label}
-                                </div>
-                                <Slider
-                                  value={
-                                    typeof sub.value === "number"
-                                      ? sub.value
-                                      : 50
-                                  }
-                                  min={sub.min || 0}
-                                  max={sub.max || 100}
-                                  onChange={(val) =>
-                                    updateSubFeature(feature.id, sub.id, val)
-                                  }
-                                />
-                              </div>
-                            )}
-                            {sub.type === "color" && (
-                              <div>
-                                <div className="text-xs font-mono text-gray-300 mb-2">
-                                  {sub.label}
-                                </div>
-                                <div className="flex gap-2" data-no-drag="true">
-                                  <input
-                                    type="color"
-                                    value={
-                                      typeof sub.value === "string"
-                                        ? sub.value
-                                        : "#ff00ff"
-                                    }
-                                    onChange={(e) =>
-                                      updateSubFeature(
-                                        feature.id,
-                                        sub.id,
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-6 h-6 border border-gray-600 cursor-pointer"
-                                  />
-                                  <span className="text-xs font-mono text-gray-400 flex items-center">
-                                    {typeof sub.value === "string"
-                                      ? sub.value
-                                      : "#ff00ff"}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {/* Category Features */}
+                  {category.features.map((feature) => (
+                    <div
+                      key={feature.id}
+                      className="p-2 border-b border-gray-700 hover:bg-gray-800/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`text-xs font-mono ${
+                            feature.enabled
+                              ? "text-green-400"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {feature.label}
+                        </span>
+                        <div data-no-drag="true">
+                          <ToggleSwitch
+                            enabled={feature.enabled}
+                            onChange={() => toggleFeature(feature.id)}
+                          />
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -379,7 +288,7 @@ export default function CheatPanel() {
         {/* Footer Status */}
         <div className="bg-gray-800 px-3 py-1 border-t border-gray-700">
           <p className="text-xs font-mono text-blue-300">
-            [{activeCount}/{features.length}] Active
+            [{activeCount}/{totalCount}] Active
           </p>
         </div>
       </div>
