@@ -7,43 +7,31 @@ interface Feature {
   enabled: boolean;
 }
 
-export default function CheatPanel() {
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 20 });
+function ToggleSwitch({
+  enabled,
+  onChange,
+}: {
+  enabled: boolean;
+  onChange: () => void;
+}) {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isVisible, setIsVisible] = useState(true);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [dragStart, setDragStart] = useState(0);
+  const toggleRef = useRef<HTMLDivElement>(null);
 
-  const [features, setFeatures] = useState<Feature[]>([
-    { id: "aimbot", label: "Aimbot", enabled: false },
-    { id: "esp", label: "ESP", enabled: false },
-    { id: "fly", label: "Fly", enabled: false },
-    { id: "cframe", label: "CFrame", enabled: false },
-  ]);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest("[data-no-drag]")
-    ) {
-      return;
-    }
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    setDragOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
+    setDragStart(e.clientX);
   };
 
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y,
-      });
+      const dragDistance = e.clientX - dragStart;
+      if (Math.abs(dragDistance) > 20) {
+        onChange();
+        setIsDragging(false);
+      }
     };
 
     const handleMouseUp = () => {
@@ -57,7 +45,77 @@ export default function CheatPanel() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragStart, onChange]);
+
+  return (
+    <div
+      ref={toggleRef}
+      onClick={onChange}
+      onMouseDown={handleMouseDown}
+      className={`w-16 h-10 rounded-full transition-all duration-300 flex items-center cursor-grab active:cursor-grabbing ${
+        enabled ? "bg-purple-500" : "bg-gray-300"
+      }`}
+    >
+      <div
+        className={`w-8 h-8 bg-white rounded-full shadow-lg transition-transform duration-300 ${
+          enabled ? "translate-x-7" : "translate-x-1"
+        }`}
+      />
+    </div>
+  );
+}
+
+export default function CheatPanel() {
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [position, setPosition] = useState({ x: 30, y: 30 });
+  const [isPanelDragging, setIsPanelDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(true);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const [features, setFeatures] = useState<Feature[]>([
+    { id: "aimbot", label: "Aimbot", enabled: false },
+    { id: "esp", label: "ESP", enabled: false },
+    { id: "fly", label: "Fly", enabled: false },
+    { id: "cframe", label: "CFrame", enabled: false },
+  ]);
+
+  const handlePanelMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (
+      (e.target as HTMLElement).closest("button") ||
+      (e.target as HTMLElement).closest("[data-no-drag]")
+    ) {
+      return;
+    }
+    setIsPanelDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  useEffect(() => {
+    if (!isPanelDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsPanelDragging(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isPanelDragging, dragOffset]);
 
   const toggleFeature = (id: string) => {
     setFeatures(
@@ -74,85 +132,61 @@ export default function CheatPanel() {
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isPanelDragging ? "grabbing" : "grab",
       }}
     >
-      <div className="w-72 bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 rounded-2xl shadow-2xl border border-purple-700/50 overflow-hidden">
+      <div className="w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
         {/* Header */}
         <div
-          onMouseDown={handleMouseDown}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 flex items-center justify-between cursor-grab active:cursor-grabbing"
+          onMouseDown={handlePanelMouseDown}
+          className="bg-purple-600 px-8 py-5 flex items-center justify-between cursor-grab active:cursor-grabbing"
         >
-          <h2 className="text-lg font-bold text-white tracking-wide">
-            CHEAT MENU
-          </h2>
-          <div className="flex gap-2">
+          <h2 className="text-2xl font-bold text-white">CHEAT MENU</h2>
+          <div className="flex gap-3">
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1.5 hover:bg-purple-500/30 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-purple-500 rounded-lg transition-colors duration-200"
               data-no-drag="true"
             >
-              <Minus size={18} className="text-white" />
+              <Minus size={22} className="text-white" />
             </button>
             <button
               onClick={() => setIsVisible(false)}
-              className="p-1.5 hover:bg-red-500/30 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-red-500 rounded-lg transition-colors duration-200"
               data-no-drag="true"
             >
-              <X size={18} className="text-white" />
+              <X size={22} className="text-white" />
             </button>
           </div>
         </div>
 
         {/* Content */}
         {!isMinimized && (
-          <div className="p-5 space-y-4">
+          <div className="p-8 space-y-6 bg-gray-50">
             {features.map((feature) => (
-              <label
+              <div
                 key={feature.id}
-                className="flex items-center gap-3 cursor-pointer group"
+                className="flex items-center justify-between"
               >
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={feature.enabled}
-                    onChange={() => toggleFeature(feature.id)}
-                    className="w-5 h-5 opacity-0 cursor-pointer"
-                  />
-                  <div
-                    className={`absolute inset-0 rounded-lg border-2 transition-all duration-200 ${
-                      feature.enabled
-                        ? "bg-gradient-to-br from-purple-400 to-purple-500 border-purple-300 shadow-lg shadow-purple-500/50"
-                        : "bg-purple-800/50 border-purple-600 group-hover:border-purple-500"
-                    }`}
-                  >
-                    {feature.enabled && (
-                      <svg
-                        className="absolute inset-0 w-full h-full text-white p-0.5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className="text-purple-100 font-medium group-hover:text-white transition-colors duration-200">
+                <span className="text-lg font-semibold text-gray-800">
                   {feature.label}
                 </span>
-              </label>
+                <div data-no-drag="true">
+                  <ToggleSwitch
+                    enabled={feature.enabled}
+                    onChange={() => toggleFeature(feature.id)}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}
 
         {/* Footer Status */}
-        <div className="bg-purple-950/50 px-5 py-3 border-t border-purple-700/50">
-          <p className="text-xs text-purple-300/70">
-            Active: {features.filter((f) => f.enabled).length}/{features.length}
+        <div className="bg-gray-100 px-8 py-4 border-t border-gray-200">
+          <p className="text-sm font-medium text-gray-600">
+            Active Features: {features.filter((f) => f.enabled).length}/
+            {features.length}
           </p>
         </div>
       </div>
