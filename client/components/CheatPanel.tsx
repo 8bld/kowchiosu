@@ -203,12 +203,6 @@ export default function CheatPanel() {
 
   if (!isVisible) return null;
 
-  const activeCount = categories.reduce(
-    (sum, cat) => sum + cat.features.filter((f) => f.enabled).length,
-    0
-  );
-  const totalCount = categories.reduce((sum, cat) => sum + cat.features.length, 0);
-
   return (
     <div
       ref={panelRef}
