@@ -291,41 +291,30 @@ export default function CheatPanel() {
         cursor: isPanelDragging ? "grabbing" : "grab",
       }}
     >
-      {/* macOS-style Header */}
-      <div
-        onMouseDown={handlePanelMouseDown}
-        className="bg-gradient-to-r from-purple-500 to-purple-600 px-5 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl"
-      >
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="w-4 h-4 rounded-full bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
-            data-no-drag="true"
-          >
-            <Minus size={10} className="text-yellow-700" />
-          </button>
-          <button
-            onClick={() => {
-              // Fullscreen toggle
-            }}
-            className="w-4 h-4 rounded-full bg-green-400 hover:bg-green-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
-            data-no-drag="true"
-          >
-            <Maximize2 size={10} className="text-green-700" />
-          </button>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="w-4 h-4 rounded-full bg-red-400 hover:bg-red-300 transition-colors duration-200 flex-shrink-0 flex items-center justify-center"
-            data-no-drag="true"
-          >
-            <X size={10} className="text-red-700" />
-          </button>
+      <div className="w-72 bg-gray-900 border-2 border-gray-700 shadow-lg overflow-hidden" style={{ fontFamily: "system-ui, monospace" }}>
+        {/* Simple Header */}
+        <div
+          onMouseDown={handlePanelMouseDown}
+          className="bg-gray-800 px-3 py-2 flex items-center justify-between cursor-grab active:cursor-grabbing border-b border-gray-700"
+        >
+          <h2 className="text-xs font-bold text-blue-300 tracking-wider">BRYAN GUI</h2>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold border border-gray-600 hover:border-gray-500 transition-colors"
+              data-no-drag="true"
+            >
+              _
+            </button>
+            <button
+              onClick={() => setIsVisible(false)}
+              className="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold border border-gray-600 hover:border-gray-500 transition-colors"
+              data-no-drag="true"
+            >
+              X
+            </button>
+          </div>
         </div>
-        <h2 className="text-sm font-bold text-white flex-1 text-center">Bryan GUI</h2>
-        <div className="w-12" />
-      </div>
-
-      <div className="w-80 bg-white rounded-b-xl shadow-xl border border-t-0 border-gray-200 overflow-hidden">
         {/* Content */}
         {!isMinimized && (
           <div className="max-h-96 overflow-y-auto bg-gray-50">
