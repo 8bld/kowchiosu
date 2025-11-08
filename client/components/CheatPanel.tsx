@@ -120,6 +120,7 @@ export default function CheatPanel() {
   const [isPanelDragging, setIsPanelDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(true);
+  const [activeCategory, setActiveCategory] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const [categories, setCategories] = useState<FeatureCategory[]>([
