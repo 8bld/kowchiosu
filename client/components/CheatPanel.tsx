@@ -69,13 +69,13 @@ function ToggleSwitch({
       ref={toggleRef}
       onClick={onChange}
       onMouseDown={handleMouseDown}
-      className={`w-12 h-7 rounded-full transition-all duration-300 flex items-center cursor-grab active:cursor-grabbing ${
-        enabled ? "bg-purple-500" : "bg-gray-300"
+      className={`w-10 h-5 transition-all duration-200 flex items-center cursor-grab active:cursor-grabbing border-2 ${
+        enabled ? "bg-green-700 border-green-500" : "bg-gray-700 border-gray-600"
       }`}
     >
       <div
-        className={`w-6 h-6 bg-white rounded-full shadow-lg transition-transform duration-300 ${
-          enabled ? "translate-x-5" : "translate-x-0.5"
+        className={`w-3 h-3 transition-transform duration-200 ${
+          enabled ? "translate-x-4 bg-green-300" : "translate-x-0.5 bg-gray-400"
         }`}
       />
     </div>
