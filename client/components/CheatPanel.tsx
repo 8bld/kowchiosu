@@ -189,42 +189,24 @@ export default function CheatPanel() {
     };
   }, [isPanelDragging, dragOffset]);
 
-  const toggleFeature = (id: string) => {
-    setFeatures(
-      features.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
-    );
-  };
-
-  const toggleExpanded = (id: string) => {
-    setFeatures(
-      features.map((f) =>
-        f.id === id ? { ...f, expanded: !f.expanded } : f
-      )
-    );
-  };
-
-  const updateSubFeature = (
-    featureId: string,
-    subFeatureId: string,
-    newValue: any
-  ) => {
-    setFeatures(
-      features.map((f) =>
-        f.id === featureId
-          ? {
-              ...f,
-              subFeatures: f.subFeatures?.map((sf) =>
-                sf.id === subFeatureId ? { ...sf, value: newValue } : sf
-              ),
-            }
-          : f
-      )
+  const toggleFeature = (featureId: string) => {
+    setCategories(
+      categories.map((cat) => ({
+        ...cat,
+        features: cat.features.map((f) =>
+          f.id === featureId ? { ...f, enabled: !f.enabled } : f
+        ),
+      }))
     );
   };
 
   if (!isVisible) return null;
 
-  const activeCount = features.filter((f) => f.enabled).length;
+  const activeCount = categories.reduce(
+    (sum, cat) => sum + cat.features.filter((f) => f.enabled).length,
+    0
+  );
+  const totalCount = categories.reduce((sum, cat) => sum + cat.features.length, 0);
 
   return (
     <div
