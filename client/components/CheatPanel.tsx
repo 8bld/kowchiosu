@@ -317,22 +317,22 @@ export default function CheatPanel() {
         </div>
         {/* Content */}
         {!isMinimized && (
-          <div className="max-h-96 overflow-y-auto bg-gray-50">
-            <div className="divide-y divide-gray-200">
+          <div className="max-h-96 overflow-y-auto bg-gray-900">
+            <div className="divide-y divide-gray-700">
               {features.map((feature) => (
-                <div key={feature.id} className="p-3">
+                <div key={feature.id} className="p-2 border-b border-gray-700">
                   {/* Main Toggle Row */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex-1 flex items-center gap-1">
                       {feature.subFeatures && feature.subFeatures.length > 0 && (
                         <button
                           onClick={() => toggleExpanded(feature.id)}
-                          className="p-0.5 hover:bg-gray-200 rounded transition-colors"
+                          className="p-0 hover:text-blue-300 transition-colors"
                           data-no-drag="true"
                         >
                           <ChevronDown
-                            size={16}
-                            className={`text-gray-600 transition-transform ${
+                            size={14}
+                            className={`text-gray-400 transition-transform ${
                               feature.expanded ? "rotate-180" : ""
                             }`}
                           />
@@ -340,13 +340,13 @@ export default function CheatPanel() {
                       )}
                       {!feature.subFeatures ||
                         (feature.subFeatures.length === 0 && (
-                          <div className="w-5" />
+                          <div className="w-4" />
                         ))}
                       <span
-                        className={`text-sm font-semibold ${
+                        className={`text-xs font-mono ${
                           feature.enabled
-                            ? "text-purple-600"
-                            : "text-gray-700"
+                            ? "text-green-400"
+                            : "text-gray-400"
                         }`}
                       >
                         {feature.label}
@@ -364,7 +364,7 @@ export default function CheatPanel() {
                   {feature.expanded &&
                     feature.subFeatures &&
                     feature.subFeatures.length > 0 && (
-                      <div className="mt-3 ml-6 space-y-3 border-l-2 border-purple-200 pl-3">
+                      <div className="mt-2 ml-4 space-y-2 border-l border-gray-700 pl-2">
                         {feature.subFeatures.map((sub) => (
                           <div key={sub.id}>
                             {sub.type === "toggle" && (
