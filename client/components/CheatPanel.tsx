@@ -291,31 +291,35 @@ export default function CheatPanel() {
         cursor: isPanelDragging ? "grabbing" : "grab",
       }}
     >
-      <div className="w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div
-          onMouseDown={handlePanelMouseDown}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
-        >
-          <h2 className="text-lg font-bold text-white">CHEAT</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1.5 hover:bg-purple-500 rounded-lg transition-colors duration-200"
-              data-no-drag="true"
-            >
-              <Minus size={18} className="text-white" />
-            </button>
-            <button
-              onClick={() => setIsVisible(false)}
-              className="p-1.5 hover:bg-red-500 rounded-lg transition-colors duration-200"
-              data-no-drag="true"
-            >
-              <X size={18} className="text-white" />
-            </button>
-          </div>
+      {/* macOS-style Header */}
+      <div
+        onMouseDown={handlePanelMouseDown}
+        className="bg-gradient-to-r from-purple-500 to-purple-600 px-5 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl"
+      >
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 flex-shrink-0"
+            data-no-drag="true"
+          />
+          <button
+            onClick={() => {
+              // Fullscreen toggle
+            }}
+            className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-300 transition-colors duration-200 flex-shrink-0"
+            data-no-drag="true"
+          />
+          <button
+            onClick={() => setIsVisible(false)}
+            className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-300 transition-colors duration-200 flex-shrink-0"
+            data-no-drag="true"
+          />
         </div>
+        <h2 className="text-sm font-bold text-white flex-1 text-center">Bryan GUI</h2>
+        <div className="w-12" />
+      </div>
 
+      <div className="w-80 bg-white rounded-b-xl shadow-xl border border-t-0 border-gray-200 overflow-hidden">
         {/* Content */}
         {!isMinimized && (
           <div className="max-h-96 overflow-y-auto bg-gray-50">
