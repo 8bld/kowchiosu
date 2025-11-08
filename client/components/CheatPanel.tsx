@@ -450,9 +450,9 @@ export default function CheatPanel() {
         )}
 
         {/* Footer Status */}
-        <div className="bg-gray-100 px-5 py-2 border-t border-gray-200">
-          <p className="text-xs font-medium text-gray-600">
-            Active: {activeCount}/{features.length}
+        <div className="bg-gray-800 px-3 py-1 border-t border-gray-700">
+          <p className="text-xs font-mono text-blue-300">
+            [{activeCount}/{features.length}] Active
           </p>
         </div>
       </div>
