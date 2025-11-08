@@ -122,94 +122,33 @@ export default function CheatPanel() {
   const [isVisible, setIsVisible] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const [features, setFeatures] = useState<Feature[]>([
+  const [categories, setCategories] = useState<FeatureCategory[]>([
     {
-      id: "aimbot",
-      label: "Aimbot",
-      enabled: false,
-      expanded: false,
-      subFeatures: [
-        { id: "prediction", label: "Prediction", type: "toggle" },
-        { id: "sticky", label: "Sticky Aim", type: "toggle" },
-        { id: "fov", label: "FOV", type: "slider", value: 50, min: 10, max: 180 },
+      name: "Aimbot",
+      features: [
+        { id: "aimbot", label: "Aimbot", enabled: false },
+        { id: "prediction", label: "Prediction", enabled: false },
+        { id: "sticky", label: "Sticky Aim", enabled: false },
       ],
     },
     {
-      id: "esp",
-      label: "ESP",
-      enabled: false,
-      expanded: false,
-      subFeatures: [
-        { id: "boxes", label: "Boxes", type: "toggle" },
-        { id: "names", label: "Names", type: "toggle" },
-        { id: "distance", label: "Distance", type: "toggle" },
-        {
-          id: "espcolor",
-          label: "ESP Color",
-          type: "color",
-          value: "#ff00ff",
-        },
+      name: "ESP",
+      features: [
+        { id: "esp", label: "ESP", enabled: false },
+        { id: "boxes", label: "Boxes", enabled: false },
+        { id: "names", label: "Names", enabled: false },
+        { id: "distance", label: "Distance", enabled: false },
       ],
     },
     {
-      id: "fly",
-      label: "Fly",
-      enabled: false,
-      expanded: false,
-      subFeatures: [
-        {
-          id: "flyspeed",
-          label: "Fly Speed",
-          type: "slider",
-          value: 50,
-          min: 1,
-          max: 100,
-        },
+      name: "Exploits",
+      features: [
+        { id: "fly", label: "Fly", enabled: false },
+        { id: "cframe", label: "CFrame", enabled: false },
+        { id: "noclip", label: "Noclip", enabled: false },
+        { id: "speed", label: "Speed Boost", enabled: false },
+        { id: "invisible", label: "Invisible", enabled: false },
       ],
-    },
-    {
-      id: "cframe",
-      label: "CFrame",
-      enabled: false,
-      expanded: false,
-      subFeatures: [
-        {
-          id: "cframespeed",
-          label: "CFrame Speed",
-          type: "slider",
-          value: 50,
-          min: 1,
-          max: 100,
-        },
-      ],
-    },
-    {
-      id: "noclip",
-      label: "Noclip",
-      enabled: false,
-      expanded: false,
-    },
-    {
-      id: "speed",
-      label: "Speed Boost",
-      enabled: false,
-      expanded: false,
-      subFeatures: [
-        {
-          id: "speedvalue",
-          label: "Speed",
-          type: "slider",
-          value: 50,
-          min: 1,
-          max: 100,
-        },
-      ],
-    },
-    {
-      id: "invisible",
-      label: "Invisible",
-      enabled: false,
-      expanded: false,
     },
   ]);
 
