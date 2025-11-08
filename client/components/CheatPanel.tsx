@@ -218,7 +218,7 @@ export default function CheatPanel() {
         cursor: isPanelDragging ? "grabbing" : "grab",
       }}
     >
-      <div className="w-72 bg-gray-900 border-2 border-gray-700 shadow-lg overflow-hidden" style={{ fontFamily: "system-ui, monospace" }}>
+      <div className="w-96 bg-gray-900 border-2 border-gray-700 shadow-lg overflow-hidden" style={{ fontFamily: "system-ui, monospace" }}>
         {/* Simple Header */}
         <div
           onMouseDown={handlePanelMouseDown}
