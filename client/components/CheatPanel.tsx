@@ -16,12 +16,15 @@ interface SubFeature {
   max?: number;
 }
 
+interface FeatureCategory {
+  name: string;
+  features: Feature[];
+}
+
 interface Feature {
   id: string;
   label: string;
   enabled: boolean;
-  expanded?: boolean;
-  subFeatures?: SubFeature[];
 }
 
 function ToggleSwitch({
