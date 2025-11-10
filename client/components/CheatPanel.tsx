@@ -108,17 +108,12 @@ export default function CheatPanel() {
         cursor: isDragging ? "grabbing" : "grab",
       }}
     >
-      <div className="w-screen max-w-4xl rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-black/90 border border-white/10">
+      <div className="w-screen max-w-4xl shadow-2xl overflow-hidden bg-slate-950 border border-slate-700">
         {/* Header */}
         <div
           onMouseDown={handleMouseDown}
-          className="relative bg-gradient-to-r from-cyan-600/40 via-blue-600/40 to-purple-600/40 px-8 py-5 flex items-center justify-between cursor-grab active:cursor-grabbing border-b border-white/5 backdrop-blur-sm"
+          className="relative bg-slate-900 px-6 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing border-b border-slate-700"
         >
-          {/* Animated background */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -top-32 -left-32 animate-pulse" />
-            <div className="absolute w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -bottom-32 -right-32 animate-pulse" />
-          </div>
 
           <div className="relative flex items-center gap-4">
             <div className="flex items-center gap-3">
