@@ -170,55 +170,49 @@ export default function CheatPanel() {
             </div>
 
             {/* Features Grid */}
-            <div className="w-2/3 overflow-y-auto bg-slate-900/30 p-6">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="w-2/3 overflow-y-auto bg-slate-950 p-4">
+              <div className="grid grid-cols-2 gap-2">
                 {features.map((feature) => (
                   <div
                     key={feature.id}
-                    className={`group p-4 rounded-2xl transition-all duration-300 cursor-pointer border-2 ${
+                    className={`group p-3 transition-colors duration-200 cursor-pointer border ${
                       feature.enabled
-                        ? "bg-gradient-to-br from-cyan-600/30 to-blue-600/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20"
-                        : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50 hover:border-slate-600/70"
+                        ? "bg-slate-900/80 border-cyan-600 text-cyan-300"
+                        : "bg-slate-900/40 border-slate-700 text-slate-400 hover:bg-slate-900/60 hover:border-slate-600"
                     }`}
                     onClick={() => toggleFeature(feature.id)}
                   >
-                    <div className="flex items-start gap-3 mb-2">
+                    <div className="flex items-start gap-2 mb-1">
                       <div
-                        className={`p-2.5 rounded-lg transition-all duration-300 ${
+                        className={`p-1.5 transition-colors duration-200 ${
                           feature.enabled
-                            ? "bg-cyan-500/40 text-cyan-200"
-                            : "bg-slate-700/50 text-slate-400 group-hover:bg-slate-600/50"
+                            ? "bg-slate-800 text-cyan-400"
+                            : "bg-slate-800/50 text-slate-500"
                         }`}
                       >
                         {feature.icon}
                       </div>
                       <div className="flex-1">
-                        <p
-                          className={`font-bold text-sm ${
-                            feature.enabled
-                              ? "text-cyan-300"
-                              : "text-slate-300 group-hover:text-slate-200"
-                          }`}
-                        >
+                        <p className="font-semibold text-xs">
                           {feature.label}
                         </p>
                       </div>
                       <div
-                        className={`w-5 h-5 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${
+                        className={`w-4 h-4 border transition-colors duration-200 flex items-center justify-center flex-shrink-0 ${
                           feature.enabled
-                            ? "bg-cyan-500/60 border-cyan-400 shadow-lg shadow-cyan-500/30"
-                            : "border-slate-600 group-hover:border-slate-500"
+                            ? "bg-cyan-600 border-cyan-500"
+                            : "border-slate-600 bg-transparent"
                         }`}
                       >
                         {feature.enabled && (
-                          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                          <div className="w-1.5 h-1.5 bg-white" />
                         )}
                       </div>
                     </div>
 
                     {/* Slider */}
                     {feature.enabled && (
-                      <div className="pl-10 pr-1">
+                      <div className="pl-9 pr-1 text-xs">
                         <input
                           type="range"
                           min="0"
@@ -228,12 +222,12 @@ export default function CheatPanel() {
                             updateValue(feature.id, Number(e.target.value))
                           }
                           onClick={(e) => e.stopPropagation()}
-                          className="w-full h-1 rounded-full bg-slate-700 appearance-none cursor-pointer accent-cyan-500"
+                          className="w-full h-0.5 bg-slate-700 appearance-none cursor-pointer"
                           style={{
                             accentColor: "#06b6d4",
                           }}
                         />
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-slate-500 mt-0.5">
                           {feature.value}%
                         </p>
                       </div>
