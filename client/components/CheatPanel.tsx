@@ -139,6 +139,7 @@ export default function CheatPanel() {
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: "900px",
+        minHeight: "100px",
       }}
     >
       {/* Panel Container */}
