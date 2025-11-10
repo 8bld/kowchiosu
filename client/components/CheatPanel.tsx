@@ -144,18 +144,15 @@ export default function CheatPanel() {
         {!isMinimized && (
           <div className="flex h-screen max-h-96">
             {/* 3D Character Spinner */}
-            <div className="w-1/3 bg-gradient-to-br from-slate-800/50 via-slate-900/50 to-black/50 p-6 flex items-center justify-center border-r border-white/5 relative overflow-hidden group">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
+            <div className="w-1/3 bg-slate-900 p-6 flex items-center justify-center border-r border-slate-700 relative overflow-hidden">
               {/* 3D Model Representation with CSS */}
               <div className="relative w-32 h-32">
                 {/* Outer sphere */}
                 <div
-                  className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 animate-pulse"
+                  className="absolute inset-0 bg-gradient-to-br from-cyan-600 via-blue-600 to-slate-700"
                   style={{
                     boxShadow:
-                      "0 0 40px rgba(34, 211, 238, 0.3), inset -20px -20px 40px rgba(0, 0, 0, 0.3)",
+                      "inset -10px -10px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(34, 211, 238, 0.2)",
                     transform: `rotateX(20deg) rotateY(${rotation}deg) rotateZ(10deg)`,
                     transition: "transform 0.03s linear",
                   }}
@@ -163,15 +160,12 @@ export default function CheatPanel() {
 
                 {/* Inner detail */}
                 <div
-                  className="absolute inset-4 rounded-full bg-gradient-to-t from-transparent to-white/10"
+                  className="absolute inset-4 bg-gradient-to-t from-transparent to-white/5"
                   style={{
                     transform: `rotateX(20deg) rotateY(${rotation}deg) rotateZ(10deg)`,
                     transition: "transform 0.03s linear",
                   }}
                 />
-
-                {/* Center highlight */}
-                <div className="absolute top-1/4 left-1/4 w-12 h-12 rounded-full bg-white/20 blur-xl" />
               </div>
             </div>
 
