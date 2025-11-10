@@ -143,9 +143,9 @@ export default function CheatPanel() {
         </div>
 
         {!isMinimized && (
-          <div className="flex h-screen max-h-96">
+          <div className="flex" style={{ height: "320px" }}>
             {/* 3D Character Spinner */}
-            <div className="w-1/3 bg-slate-900 p-6 flex items-center justify-center border-r border-slate-700 relative overflow-hidden">
+            <div className="w-1/3 bg-slate-900 p-6 flex items-center justify-center border-r border-slate-700 relative overflow-hidden" style={{ height: "320px" }}>
               {/* 3D Model Representation with CSS */}
               <div className="relative w-32 h-32">
                 {/* Outer sphere */}
