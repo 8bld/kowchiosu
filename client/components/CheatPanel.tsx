@@ -106,9 +106,10 @@ export default function CheatPanel() {
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "grab",
+        width: "900px"
       }}
     >
-      <div className="shadow-2xl overflow-hidden bg-slate-950 border border-slate-700" style={{ width: "900px" }}>
+      <div className="shadow-2xl overflow-hidden bg-slate-950 border border-slate-700 h-full">
         {/* Header */}
         <div
           onMouseDown={handleMouseDown}
