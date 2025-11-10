@@ -171,7 +171,7 @@ export default function CheatPanel() {
             </div>
 
             {/* Features Grid */}
-            <div className="w-2/3 overflow-y-auto bg-slate-950 p-4">
+            <div className="w-2/3 overflow-y-auto bg-slate-950 p-4" style={{ height: "320px" }}>
               <div className="grid grid-cols-2 gap-2">
                 {features.map((feature) => (
                   <div
