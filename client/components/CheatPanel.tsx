@@ -115,30 +115,28 @@ export default function CheatPanel() {
           className="relative bg-slate-900 px-6 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing border-b border-slate-700"
         >
 
-          <div className="relative flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 animate-pulse shadow-lg shadow-cyan-500/50" />
-              <h1 className="text-2xl font-black text-white tracking-wider">
-                BRYAN<span className="text-cyan-400"> GUI</span>
-              </h1>
-            </div>
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-cyan-500" />
+            <h1 className="text-lg font-bold text-white">
+              BRYAN GUI
+            </h1>
           </div>
 
-          <div className="relative flex items-center gap-3">
-            <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm font-bold text-cyan-300">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 px-2 py-1 border border-slate-600 bg-slate-900/50">
               [{activeCount}/{features.length}]
-            </div>
+            </span>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 text-white/70 hover:text-white"
+              className="p-1.5 hover:bg-slate-800 transition-colors text-slate-400 hover:text-white text-sm"
             >
-              <Minus size={18} />
+              _
             </button>
             <button
               onClick={() => setIsVisible(false)}
-              className="p-2 hover:bg-red-500/20 rounded-xl transition-all duration-200 text-white/70 hover:text-red-400"
+              className="p-1.5 hover:bg-slate-800 transition-colors text-slate-400 hover:text-red-400 text-sm"
             >
-              <X size={18} />
+              X
             </button>
           </div>
         </div>
