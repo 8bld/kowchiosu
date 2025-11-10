@@ -1,57 +1,183 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Minus, ChevronDown, Maximize2 } from "lucide-react";
-
-interface FeatureToggle {
-  id: string;
-  label: string;
-  enabled: boolean;
-}
-
-interface SubFeature {
-  id: string;
-  label: string;
-  type: "toggle" | "slider" | "color";
-  value?: number | string;
-  min?: number;
-  max?: number;
-}
-
-interface FeatureCategory {
-  name: string;
-  features: Feature[];
-}
+import {
+  Target,
+  Eye,
+  Wind,
+  Zap,
+  Ghost,
+  Gauge,
+  Menu,
+  X,
+  Minus,
+} from "lucide-react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Sphere } from "@react-three/drei";
+import * as THREE from "three";
 
 interface Feature {
   id: string;
   label: string;
+  icon: React.ReactNode;
   enabled: boolean;
+  category: string;
 }
 
-function ToggleSwitch({
-  enabled,
-  onChange,
-}: {
-  enabled: boolean;
-  onChange: () => void;
-}) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState(0);
-  const toggleRef = useRef<HTMLDivElement>(null);
+function RotatingModel() {
+  const meshRef = useRef<THREE.Group>(null);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (meshRef.current) {
+        meshRef.current.rotation.y += 0.005;
+      }
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <group ref={meshRef}>
+      <Sphere args={[1, 64, 64]}>
+        <meshStandardMaterial
+          color="#6366f1"
+          metalness={0.8}
+          roughness={0.2}
+          emissive="#4f46e5"
+          emissiveIntensity={0.5}
+        />
+      </Sphere>
+    </group>
+  );
+}
+
+const featureIcons: Record<string, React.ReactNode> = {
+  aimbot: <Target size={20} />,
+  prediction: <Gauge size={20} />,
+  sticky: <Zap size={20} />,
+  esp: <Eye size={20} />,
+  boxes: <Target size={20} />,
+  names: <Eye size={20} />,
+  distance: <Gauge size={20} />,
+  fly: <Wind size={20} />,
+  cframe: <Zap size={20} />,
+  noclip: <Ghost size={20} />,
+  speed: <Gauge size={20} />,
+  invisible: <Ghost size={20} />,
+};
+
+export default function CheatPanel() {
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const [features, setFeatures] = useState<Feature[]>([
+    {
+      id: "aimbot",
+      label: "Aimbot",
+      icon: featureIcons.aimbot,
+      enabled: false,
+      category: "Combat",
+    },
+    {
+      id: "prediction",
+      label: "Prediction",
+      icon: featureIcons.prediction,
+      enabled: false,
+      category: "Combat",
+    },
+    {
+      id: "sticky",
+      label: "Sticky Aim",
+      icon: featureIcons.sticky,
+      enabled: false,
+      category: "Combat",
+    },
+    {
+      id: "esp",
+      label: "ESP",
+      icon: featureIcons.esp,
+      enabled: false,
+      category: "Vision",
+    },
+    {
+      id: "boxes",
+      label: "Boxes",
+      icon: featureIcons.boxes,
+      enabled: false,
+      category: "Vision",
+    },
+    {
+      id: "names",
+      label: "Names",
+      icon: featureIcons.names,
+      enabled: false,
+      category: "Vision",
+    },
+    {
+      id: "distance",
+      label: "Distance",
+      icon: featureIcons.distance,
+      enabled: false,
+      category: "Vision",
+    },
+    {
+      id: "fly",
+      label: "Fly",
+      icon: featureIcons.fly,
+      enabled: false,
+      category: "Movement",
+    },
+    {
+      id: "cframe",
+      label: "CFrame",
+      icon: featureIcons.cframe,
+      enabled: false,
+      category: "Movement",
+    },
+    {
+      id: "noclip",
+      label: "Noclip",
+      icon: featureIcons.noclip,
+      enabled: false,
+      category: "Movement",
+    },
+    {
+      id: "speed",
+      label: "Speed",
+      icon: featureIcons.speed,
+      enabled: false,
+      category: "Movement",
+    },
+    {
+      id: "invisible",
+      label: "Invisible",
+      icon: featureIcons.invisible,
+      enabled: false,
+      category: "Survival",
+    },
+  ]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("button")) return;
     setIsDragging(true);
-    setDragStart(e.clientX);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
   };
 
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const dragDistance = e.clientX - dragStart;
-      if (Math.abs(dragDistance) > 20) {
-        onChange();
-        setIsDragging(false);
-      }
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
     };
 
     const handleMouseUp = () => {
@@ -65,141 +191,16 @@ function ToggleSwitch({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, dragStart, onChange]);
+  }, [isDragging, dragOffset]);
 
-  return (
-    <div
-      ref={toggleRef}
-      onClick={onChange}
-      onMouseDown={handleMouseDown}
-      className={`w-10 h-5 transition-all duration-200 flex items-center cursor-grab active:cursor-grabbing border-2 ${
-        enabled ? "bg-green-700 border-green-500" : "bg-gray-700 border-gray-600"
-      }`}
-    >
-      <div
-        className={`w-3 h-3 transition-transform duration-200 ${
-          enabled ? "translate-x-4 bg-green-300" : "translate-x-0.5 bg-gray-400"
-        }`}
-      />
-    </div>
-  );
-}
-
-function Slider({
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  onChange: (val: number) => void;
-}) {
-  return (
-    <div className="space-y-1" data-no-drag="true">
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-600 appearance-none cursor-pointer accent-green-500"
-        style={{
-          accentColor: "#10b981",
-        }}
-      />
-      <div className="text-xs font-mono text-gray-400 text-right">{value}</div>
-    </div>
-  );
-}
-
-export default function CheatPanel() {
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 20 });
-  const [isPanelDragging, setIsPanelDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isVisible, setIsVisible] = useState(true);
-  const [activeCategory, setActiveCategory] = useState(0);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  const [categories, setCategories] = useState<FeatureCategory[]>([
-    {
-      name: "Aimbot",
-      features: [
-        { id: "aimbot", label: "Aimbot", enabled: false },
-        { id: "prediction", label: "Prediction", enabled: false },
-        { id: "sticky", label: "Sticky Aim", enabled: false },
-      ],
-    },
-    {
-      name: "ESP",
-      features: [
-        { id: "esp", label: "ESP", enabled: false },
-        { id: "boxes", label: "Boxes", enabled: false },
-        { id: "names", label: "Names", enabled: false },
-        { id: "distance", label: "Distance", enabled: false },
-      ],
-    },
-    {
-      name: "Exploits",
-      features: [
-        { id: "fly", label: "Fly", enabled: false },
-        { id: "cframe", label: "CFrame", enabled: false },
-        { id: "noclip", label: "Noclip", enabled: false },
-        { id: "speed", label: "Speed Boost", enabled: false },
-        { id: "invisible", label: "Invisible", enabled: false },
-      ],
-    },
-  ]);
-
-  const handlePanelMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest("[data-no-drag]")
-    ) {
-      return;
-    }
-    setIsPanelDragging(true);
-    setDragOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
-
-  useEffect(() => {
-    if (!isPanelDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y,
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsPanelDragging(false);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isPanelDragging, dragOffset]);
-
-  const toggleFeature = (featureId: string) => {
-    setCategories(
-      categories.map((cat) => ({
-        ...cat,
-        features: cat.features.map((f) =>
-          f.id === featureId ? { ...f, enabled: !f.enabled } : f
-        ),
-      }))
+  const toggleFeature = (id: string) => {
+    setFeatures(
+      features.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
     );
   };
+
+  const categories = ["Combat", "Vision", "Movement", "Survival"];
+  const activeCount = features.filter((f) => f.enabled).length;
 
   if (!isVisible) return null;
 
@@ -210,95 +211,111 @@ export default function CheatPanel() {
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        cursor: isPanelDragging ? "grabbing" : "grab",
+        cursor: isDragging ? "grabbing" : "grab",
       }}
     >
-      <div className="w-96 bg-gray-900 border-2 border-gray-700 shadow-lg overflow-hidden" style={{ fontFamily: "system-ui, monospace" }}>
-        {/* Simple Header */}
+      <div className="w-screen max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden backdrop-blur-sm">
+        {/* Header */}
         <div
-          onMouseDown={handlePanelMouseDown}
-          className="bg-gray-800 px-3 py-2 flex items-center justify-between cursor-grab active:cursor-grabbing border-b border-gray-700"
+          onMouseDown={handleMouseDown}
+          className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 flex items-center justify-between cursor-grab active:cursor-grabbing"
         >
-          <h2 className="text-xs font-bold text-blue-300 tracking-wider">BRYAN GUI</h2>
-          <div className="flex gap-1">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+            <h1 className="text-xl font-bold text-white tracking-wide">
+              BRYAN GUI
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-blue-100 font-medium">
+              [{activeCount}/{features.length}]
+            </span>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold border border-gray-600 hover:border-gray-500 transition-colors"
-              data-no-drag="true"
+              className="p-2 hover:bg-blue-500/30 rounded-lg transition-colors"
             >
-              _
+              <Minus size={18} className="text-white" />
             </button>
             <button
               onClick={() => setIsVisible(false)}
-              className="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold border border-gray-600 hover:border-gray-500 transition-colors"
-              data-no-drag="true"
+              className="p-2 hover:bg-red-500/30 rounded-lg transition-colors"
             >
-              X
+              <X size={18} className="text-white" />
             </button>
           </div>
         </div>
-        {/* Category Tabs */}
-        {!isMinimized && (
-          <div className="bg-gray-800 border-b border-gray-700 flex overflow-x-auto">
-            {categories.map((category, index) => (
-              <button
-                key={category.name}
-                onClick={() => setActiveCategory(index)}
-                className={`flex-1 px-3 py-2 text-xs font-bold transition-colors border-b-2 ${
-                  activeCategory === index
-                    ? "text-blue-300 border-b-blue-400 bg-gray-700/50"
-                    : "text-gray-400 border-b-transparent hover:text-gray-300"
-                }`}
-                data-no-drag="true"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        )}
 
-        {/* Content */}
         {!isMinimized && (
-          <div className="max-h-80 overflow-y-auto bg-gray-900">
-            {categories[activeCategory] && (
-              <div className="divide-y divide-gray-700">
-                {categories[activeCategory].features.map((feature) => (
-                  <div
+          <div className="flex h-96">
+            {/* 3D Model Viewer */}
+            <div className="w-1/3 bg-slate-900/50 border-r border-slate-700/50">
+              <Canvas camera={{ position: [0, 0, 3], fov: 50 }}>
+                <ambientLight intensity={0.5} />
+                <pointLight position={[10, 10, 10]} intensity={1} />
+                <pointLight position={[-10, -10, 10]} intensity={0.5} />
+                <RotatingModel />
+                <OrbitControls autoRotate autoRotateSpeed={4} />
+              </Canvas>
+            </div>
+
+            {/* Features Grid */}
+            <div className="w-2/3 p-4 overflow-y-auto bg-slate-800/30">
+              <div className="grid grid-cols-2 gap-2">
+                {features.map((feature) => (
+                  <button
                     key={feature.id}
-                    className="p-2 border-b border-gray-700 hover:bg-gray-800/50 transition-colors"
+                    onClick={() => toggleFeature(feature.id)}
+                    className={`group p-3 rounded-lg border-2 transition-all duration-200 flex items-center gap-2 ${
+                      feature.enabled
+                        ? "bg-indigo-600/40 border-indigo-500 text-indigo-100"
+                        : "bg-slate-700/40 border-slate-600 text-slate-300 hover:bg-slate-600/40 hover:border-slate-500"
+                    }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`text-xs font-mono ${
-                          feature.enabled
-                            ? "text-green-400"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {feature.label}
-                      </span>
-                      <div data-no-drag="true">
-                        <ToggleSwitch
-                          enabled={feature.enabled}
-                          onChange={() => toggleFeature(feature.id)}
-                        />
-                      </div>
+                    <div
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        feature.enabled
+                          ? "bg-indigo-500/50"
+                          : "bg-slate-600/50 group-hover:bg-slate-500/50"
+                      }`}
+                    >
+                      {feature.icon}
                     </div>
+                    <span className="text-sm font-semibold flex-1 text-left">
+                      {feature.label}
+                    </span>
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 transition-all ${
+                        feature.enabled
+                          ? "bg-indigo-400 border-indigo-300"
+                          : "bg-transparent border-slate-500"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {/* Category Legend */}
+              <div className="mt-4 pt-3 border-t border-slate-700/50 text-xs text-slate-400 space-y-1">
+                {categories.map((cat) => (
+                  <div key={cat} className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    {cat}
                   </div>
                 ))}
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* Footer Status */}
-        {!isMinimized && (
-          <div className="bg-gray-800 px-3 py-1 border-t border-gray-700">
-            <p className="text-xs font-mono text-blue-300">
-              [{categories[activeCategory]?.features.filter((f) => f.enabled).length || 0}/{categories[activeCategory]?.features.length || 0}] {categories[activeCategory]?.name}
-            </p>
+        {/* Footer */}
+        <div className="bg-slate-900/50 px-6 py-3 border-t border-slate-700/50 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Status:</span>
+            <span className="text-green-400 font-medium">●</span>
+            <span className="text-slate-300">Active</span>
           </div>
-        )}
+          <div className="text-slate-500 text-xs">v1.0 • Bryan GUI</div>
+        </div>
       </div>
     </div>
   );
