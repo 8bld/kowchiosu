@@ -148,6 +148,7 @@ export default function CheatPanel() {
           backgroundColor: guiColors.bg,
           borderColor: guiColors.outline,
           borderWidth: "1px",
+          display: "block",
         }}
       >
         {/* Header */}
