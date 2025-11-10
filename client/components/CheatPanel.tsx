@@ -240,12 +240,9 @@ export default function CheatPanel() {
         )}
 
         {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-900/80 to-black/80 px-8 py-3 border-t border-white/5 flex items-center justify-between text-xs backdrop-blur-sm">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Sliders size={14} className="text-cyan-400" />
-            <span>Advanced Cheats Control Panel</span>
-          </div>
-          <div className="text-slate-500">v2.0 Premium</div>
+        <div className="bg-slate-900 px-6 py-2 border-t border-slate-700 flex items-center justify-between text-xs">
+          <span className="text-slate-500">Advanced Cheats</span>
+          <span className="text-slate-600">v2.0</span>
         </div>
       </div>
     </div>
