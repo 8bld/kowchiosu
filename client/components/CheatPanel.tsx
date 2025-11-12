@@ -72,34 +72,52 @@ export default function CheatPanel() {
       id: "relax",
       name: "Relax",
       features: [
-        { id: "auto_click", label: "Auto Click", enabled: false, value: 50, min: 1, max: 100 },
-        { id: "click_assist", label: "Click Assist", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "single_tap", label: "Single Tap", enabled: false },
+        { id: "alternate", label: "Alternate", enabled: false },
+        { id: "variable_ur", label: "Variable Unstable Rate", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
       id: "aimbot",
       name: "Aimbot",
       features: [
-        { id: "aim_assist", label: "Aim Assist", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "smooth_aim", label: "Smooth Aim", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "cursor_delay", label: "Cursor Delay", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "spins_per_minute", label: "Spins Per Minute", enabled: false, value: 100, min: 50, max: 300 },
       ],
     },
     {
       id: "difficulty",
       name: "Difficulty",
       features: [
-        { id: "cs_mod", label: "Circle Size", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "ar_mod", label: "Approach Rate", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "circle_size", label: "Circle Size (CS)", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "approach_rate", label: "Approach Rate (AR)", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "overall_difficulty", label: "Overall Difficulty (OD)", enabled: false, value: 50, min: 0, max: 100 },
+      ],
+    },
+    {
+      id: "timewarp",
+      name: "Timewarp",
+      features: [
+        { id: "timewarp_scale", label: "Timewarp Scale", enabled: false, value: 100, min: 50, max: 200 },
       ],
     },
     {
       id: "replay",
       name: "Replay",
       features: [
-        { id: "auto_replay", label: "Auto Replay", enabled: false },
-        { id: "replay_speed", label: "Replay Speed", enabled: false, value: 50, min: 1, max: 200 },
-        { id: "frame_skip", label: "Frame Skip", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "pause_anywhere", label: "Pause Anywhere", enabled: false },
+        { id: "replay_hr", label: "Hard Rock (HR)", enabled: false },
+        { id: "replay_keys_only", label: "Replay Keys Only", enabled: false },
+        { id: "replay_aim_only", label: "Replay Aim Only", enabled: false },
+        { id: "leaderboard_replay", label: "Leaderboard Replay Download", enabled: false },
+      ],
+    },
+    {
+      id: "mods",
+      name: "Mods",
+      features: [
+        { id: "score_multiplier", label: "Score Multiplier Changer", enabled: false, value: 100, min: 10, max: 200 },
+        { id: "unmod_flashlight", label: "Unmod Flashlight", enabled: false },
+        { id: "unmod_hidden", label: "Unmod Hidden", enabled: false },
       ],
     },
   ];
@@ -258,7 +276,7 @@ export default function CheatPanel() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="px-4 py-3 font-semibold transition-all duration-300"
+                className="px-4 py-3 font-semibold transition-all duration-300 whitespace-nowrap"
                 style={{
                   color: activeTab === tab.id ? colors.primary : "rgba(241,245,249,0.5)",
                   borderBottom: activeTab === tab.id ? `2px solid ${colors.primary}` : "none",
@@ -288,7 +306,10 @@ export default function CheatPanel() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                   {/* Panic Button */}
                   <button
-                    onClick={() => alert("PANIC ACTIVATED - All features disabled")}
+                    onClick={() => {
+                      setToggledFeatures({});
+                      alert("PANIC ACTIVATED - All features disabled");
+                    }}
                     className="w-full transition-all duration-300 hover:opacity-90"
                     style={{
                       padding: "12px 16px",
@@ -375,15 +396,15 @@ export default function CheatPanel() {
                     </div>
                   </div>
 
-                  {/* Advanced Settings */}
+                  {/* UI Settings */}
                   <div>
                     <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "12px", opacity: 0.8 }}>
-                      Customization
+                      UI Settings
                     </h3>
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                       {[
+                        { label: "UI Font Size", id: "ui_font_size", min: 8, max: 24, default: 14 },
                         { label: "UI Opacity", id: "ui_opacity", min: 20, max: 100, default: 100 },
-                        { label: "Animation Speed", id: "anim_speed", min: 50, max: 200, default: 100 },
                       ].map((setting) => (
                         <div key={setting.id}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
@@ -391,7 +412,7 @@ export default function CheatPanel() {
                               {setting.label}
                             </label>
                             <span style={{ fontSize: "11px", fontWeight: "700", color: colors.primary }}>
-                              {sliderValues[setting.id] ?? setting.default}%
+                              {sliderValues[setting.id] ?? setting.default}{setting.id === "ui_font_size" ? "px" : "%"}
                             </span>
                           </div>
                           <input
@@ -407,6 +428,26 @@ export default function CheatPanel() {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Discord RPC */}
+                  <div>
+                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "12px", opacity: 0.8 }}>
+                      Discord RPC
+                    </h3>
+                    <input
+                      type="text"
+                      placeholder="Discord Status Text"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        backgroundColor: colors.surface,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: "6px",
+                        color: colors.text,
+                        fontSize: "12px",
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -428,7 +469,7 @@ export default function CheatPanel() {
                           borderRadius: "8px",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: feature.value !== undefined ? "8px" : "0" }}>
                           <button
                             onClick={() => toggleFeature(feature.id)}
                             className="transition-all duration-300"
@@ -442,6 +483,7 @@ export default function CheatPanel() {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
                             {isEnabled && (
@@ -504,7 +546,7 @@ export default function CheatPanel() {
           color: "rgba(241,245,249,0.5)",
         }}
       >
-        <span>KOWCHI v1.0</span>
+        <span>KOWCHI v1.0 (FREEDOM)</span>
         <span>AI ENHANCED</span>
       </div>
     </div>
