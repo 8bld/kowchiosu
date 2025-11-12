@@ -32,7 +32,7 @@ export default function Index() {
         <div className="text-center space-y-6 max-w-2xl">
           <div className="space-y-3">
             <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-200 to-cyan-200">
-              OSU Cheat Menu
+              KOWCHI
             </h1>
             <p className="text-lg text-blue-300/80">
               Advanced AI-powered enhancement for rhythm gaming
