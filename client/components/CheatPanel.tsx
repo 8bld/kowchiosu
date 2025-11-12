@@ -152,6 +152,21 @@ export default function CheatPanel() {
     };
   }, [isDragging, dragOffset]);
 
+  useEffect(() => {
+    const tabs = tabsRef.current;
+    if (!tabs) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        tabs.scrollLeft += e.deltaY;
+      }
+    };
+
+    tabs.addEventListener("wheel", handleWheel, { passive: false });
+    return () => tabs.removeEventListener("wheel", handleWheel);
+  }, []);
+
   const toggleFeature = (featureId: string) => {
     setToggledFeatures(prev => ({
       ...prev,
