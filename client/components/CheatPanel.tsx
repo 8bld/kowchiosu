@@ -66,8 +66,10 @@ export default function CheatPanel() {
 
   const [toggledFeatures, setToggledFeatures] = useState<Record<string, boolean>>({});
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
-  
+
   const panelRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const tabs: Tab[] = [
     {
