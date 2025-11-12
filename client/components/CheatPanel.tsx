@@ -45,6 +45,16 @@ const AnimeGirlLogo = ({ color }: { color: string }) => (
   </svg>
 );
 
+const DEFAULT_COLORS = {
+  primary: "#ec4899",
+  secondary: "#be185d",
+  background: "#0f172a",
+  surface: "#1e293b",
+  border: "#334155",
+  text: "#f1f5f9",
+  accent: "#ec4899",
+};
+
 export default function CheatPanel() {
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const [isDragging, setIsDragging] = useState(false);
@@ -52,15 +62,7 @@ export default function CheatPanel() {
   const [activeTab, setActiveTab] = useState("relax");
   const [isMinimized, setIsMinimized] = useState(false);
   
-  const [colors, setColors] = useState({
-    primary: "#3b82f6",
-    secondary: "#1e40af",
-    background: "#0f172a",
-    surface: "#1e293b",
-    border: "#334155",
-    text: "#f1f5f9",
-    accent: "#06b6d4",
-  });
+  const [colors, setColors] = useState(DEFAULT_COLORS);
 
   const [toggledFeatures, setToggledFeatures] = useState<Record<string, boolean>>({});
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
@@ -160,6 +162,10 @@ export default function CheatPanel() {
       ...prev,
       [featureId]: value
     }));
+  };
+
+  const resetTheme = () => {
+    setColors(DEFAULT_COLORS);
   };
 
   const activeTabData = tabs.find(t => t.id === activeTab);
@@ -326,6 +332,27 @@ export default function CheatPanel() {
                     }}
                   >
                     ⚠ PANIC
+                  </button>
+
+                  {/* Reset Theme Button */}
+                  <button
+                    onClick={resetTheme}
+                    className="w-full transition-all duration-300 hover:opacity-90"
+                    style={{
+                      padding: "10px 16px",
+                      background: `linear-gradient(135deg, ${colors.primary}80 0%, ${colors.secondary}80 100%)`,
+                      color: colors.text,
+                      border: `1.5px solid ${colors.primary}`,
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      letterSpacing: "0.6px",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      boxShadow: `0 4px 12px ${colors.primary}40`,
+                    }}
+                  >
+                    ↻ Reset Theme
                   </button>
 
                   {/* Color Grid */}
