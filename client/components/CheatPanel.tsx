@@ -334,9 +334,13 @@ export default function CheatPanel() {
           </div>
 
           {/* Content */}
-          <div style={{ height: "400px", overflow: "hidden" }}>
+          <div
+            ref={contentRef}
+            className="kowchi-content"
+            style={{ height: "400px", overflow: "auto" }}
+          >
             {activeTab === "misc" ? (
-              <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.background }}>
+              <div className="p-5 h-full" style={{ backgroundColor: colors.background }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                   {/* Panic Button */}
                   <button
