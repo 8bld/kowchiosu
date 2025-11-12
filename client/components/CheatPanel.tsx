@@ -1,46 +1,48 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
-interface Feature {
-  id: string;
-  label: string;
-  enabled: boolean;
-  value?: number;
-  min?: number;
-  max?: number;
-}
-
-interface Tab {
-  id: string;
-  name: string;
-  features: Feature[];
+interface FreedomConfig {
+  ar_lock: boolean;
+  ar_value: number;
+  cs_lock: boolean;
+  cs_value: number;
+  od_lock: boolean;
+  od_value: number;
+  visible: boolean;
+  font_size: number;
+  relax: boolean;
+  relax_style: string;
+  aimbot: boolean;
+  spins_per_minute: number;
+  fraction_modifier: number;
+  replay: boolean;
+  replay_aim: boolean;
+  replay_keys: boolean;
+  replay_hardrock: boolean;
+  sm_lock: boolean;
+  sm_value: number;
+  drpc: boolean;
+  drpc_state: string;
+  drpc_large: string;
+  drpc_small: string;
+  fl: boolean;
+  hd: boolean;
+  tw_lock: boolean;
+  tw_value: number;
+  jump_window: boolean;
+  show_debug: boolean;
 }
 
 const AnimeGirlLogo = ({ color }: { color: string }) => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Head */}
     <circle cx="10" cy="7" r="4.5" fill={color} opacity="0.9" />
-    
-    {/* Hair */}
     <path d="M 5.5 7 Q 5 4 10 3 Q 15 4 14.5 7" fill={color} />
-    
-    {/* Left Eye */}
     <ellipse cx="8" cy="6.5" rx="1.2" ry="1.5" fill="#000" />
     <circle cx="8.3" cy="6" r="0.4" fill="#fff" />
-    
-    {/* Right Eye */}
     <ellipse cx="12" cy="6.5" rx="1.2" ry="1.5" fill="#000" />
     <circle cx="12.3" cy="6" r="0.4" fill="#fff" />
-    
-    {/* Mouth */}
     <path d="M 9.5 8.5 Q 10 9 10.5 8.5" stroke={color} strokeWidth="0.5" fill="none" />
-    
-    {/* Body */}
     <rect x="7.5" y="11.5" width="5" height="5" fill={color} opacity="0.7" rx="1" />
-    
-    {/* Left Arm */}
     <line x1="7.5" y1="12" x2="5" y2="14" stroke={color} strokeWidth="1" />
-    
-    {/* Right Arm */}
     <line x1="12.5" y1="12" x2="15" y2="14" stroke={color} strokeWidth="1" />
   </svg>
 );
@@ -55,76 +57,117 @@ const DEFAULT_COLORS = {
   accent: "#ec4899",
 };
 
+const API_URL = "http://localhost:3000/api/config";
+
 export default function CheatPanel() {
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [activeTab, setActiveTab] = useState("relax");
+  const [activeTab, setActiveTab] = useState("difficulty");
   const [isMinimized, setIsMinimized] = useState(false);
-  
   const [colors, setColors] = useState(DEFAULT_COLORS);
-
-  const [toggledFeatures, setToggledFeatures] = useState<Record<string, boolean>>({});
-  const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
+  const [config, setConfig] = useState<FreedomConfig | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const tabs: Tab[] = [
-    {
-      id: "relax",
-      name: "Relax",
-      features: [
-        { id: "single_tap", label: "Single Tap", enabled: false },
-        { id: "alternate", label: "Alternate", enabled: false },
-        { id: "variable_ur", label: "Variable Unstable Rate", enabled: false, value: 50, min: 0, max: 100 },
-      ],
-    },
-    {
-      id: "aimbot",
-      name: "Aimbot",
-      features: [
-        { id: "cursor_delay", label: "Cursor Delay", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "spins_per_minute", label: "Spins Per Minute", enabled: false, value: 100, min: 50, max: 300 },
-      ],
-    },
-    {
-      id: "difficulty",
-      name: "Difficulty",
-      features: [
-        { id: "circle_size", label: "Circle Size (CS)", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "approach_rate", label: "Approach Rate (AR)", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "overall_difficulty", label: "Overall Difficulty (OD)", enabled: false, value: 50, min: 0, max: 100 },
-      ],
-    },
-    {
-      id: "timewarp",
-      name: "Timewarp",
-      features: [
-        { id: "timewarp_scale", label: "Timewarp Scale", enabled: false, value: 100, min: 50, max: 200 },
-      ],
-    },
-    {
-      id: "replay",
-      name: "Replay",
-      features: [
-        { id: "replay_hr", label: "Hard Rock (HR)", enabled: false },
-        { id: "replay_keys_only", label: "Replay Keys Only", enabled: false },
-        { id: "replay_aim_only", label: "Replay Aim Only", enabled: false },
-        { id: "leaderboard_replay", label: "Leaderboard Replay Download", enabled: false },
-      ],
-    },
-    {
-      id: "mods",
-      name: "Mods",
-      features: [
-        { id: "score_multiplier", label: "Score Multiplier Changer", enabled: false, value: 100, min: 10, max: 200 },
-        { id: "unmod_flashlight", label: "Unmod Flashlight", enabled: false },
-        { id: "unmod_hidden", label: "Unmod Hidden", enabled: false },
-      ],
-    },
-  ];
+  // Fetch config from backend
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setConfig(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch config:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  const updateConfig = useCallback(async (key: string, value: any) => {
+    try {
+      const response = await fetch(`${API_URL}/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, value }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setConfig(data.config);
+      }
+    } catch (error) {
+      console.error("Failed to update config:", error);
+    }
+  }, []);
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: "difficulty",
+        name: "Difficulty",
+        features: [
+          { id: "cs_lock", label: "Circle Size (CS)", type: "toggle" },
+          { id: "cs_value", label: "CS Value", type: "slider", min: 0, max: 10, step: 0.1 },
+          { id: "ar_lock", label: "Approach Rate (AR)", type: "toggle" },
+          { id: "ar_value", label: "AR Value", type: "slider", min: 0, max: 10, step: 0.1 },
+          { id: "od_lock", label: "Overall Difficulty (OD)", type: "toggle" },
+          { id: "od_value", label: "OD Value", type: "slider", min: 0, max: 10, step: 0.1 },
+        ],
+      },
+      {
+        id: "relax",
+        name: "Relax",
+        features: [
+          { id: "relax", label: "Relax Mode", type: "toggle" },
+          { id: "relax_style", label: "Relax Style", type: "text" },
+        ],
+      },
+      {
+        id: "aimbot",
+        name: "Aimbot",
+        features: [
+          { id: "aimbot", label: "Aimbot", type: "toggle" },
+          { id: "spins_per_minute", label: "Spins Per Minute", type: "slider", min: 50, max: 500, step: 1 },
+        ],
+      },
+      {
+        id: "timewarp",
+        name: "Timewarp",
+        features: [
+          { id: "tw_lock", label: "Timewarp", type: "toggle" },
+          { id: "tw_value", label: "Playback Rate", type: "slider", min: 50, max: 300, step: 1 },
+        ],
+      },
+      {
+        id: "replay",
+        name: "Replay",
+        features: [
+          { id: "replay", label: "Replay", type: "toggle" },
+          { id: "replay_aim", label: "Replay Aim Only", type: "toggle" },
+          { id: "replay_keys", label: "Replay Keys Only", type: "toggle" },
+          { id: "replay_hardrock", label: "Hard Rock", type: "toggle" },
+        ],
+      },
+      {
+        id: "mods",
+        name: "Mods",
+        features: [
+          { id: "fl", label: "Flashlight", type: "toggle" },
+          { id: "hd", label: "Hidden Remover", type: "toggle" },
+          { id: "sm_lock", label: "Score Multiplier", type: "toggle" },
+          { id: "sm_value", label: "Multiplier Value", type: "slider", min: 0.1, max: 5, step: 0.1 },
+        ],
+      },
+    ],
+    []
+  );
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input")) return;
@@ -155,37 +198,60 @@ export default function CheatPanel() {
   useEffect(() => {
     const tabs = tabsRef.current;
     if (!tabs) return;
-
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
         tabs.scrollLeft += e.deltaY;
       }
     };
-
     tabs.addEventListener("wheel", handleWheel, { passive: false });
     return () => tabs.removeEventListener("wheel", handleWheel);
   }, []);
 
-  const toggleFeature = (featureId: string) => {
-    setToggledFeatures(prev => ({
-      ...prev,
-      [featureId]: !prev[featureId]
-    }));
-  };
+  const activeTabData = tabs.find((t) => t.id === activeTab);
+  const resetTheme = () => setColors(DEFAULT_COLORS);
 
-  const updateSliderValue = (featureId: string, value: number) => {
-    setSliderValues(prev => ({
-      ...prev,
-      [featureId]: value
-    }));
-  };
+  if (loading) {
+    return (
+      <div
+        ref={panelRef}
+        className="fixed z-50"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: "420px",
+          backgroundColor: colors.background,
+          border: `1px solid ${colors.border}`,
+          borderRadius: "12px",
+          padding: "20px",
+          color: colors.text,
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
 
-  const resetTheme = () => {
-    setColors(DEFAULT_COLORS);
-  };
-
-  const activeTabData = tabs.find(t => t.id === activeTab);
+  if (!config) {
+    return (
+      <div
+        ref={panelRef}
+        className="fixed z-50"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: "420px",
+          backgroundColor: colors.background,
+          border: `1px solid ${colors.border}`,
+          borderRadius: "12px",
+          padding: "20px",
+          color: colors.text,
+        }}
+      >
+        Failed to load config
+      </div>
+    );
+  }
 
   return (
     <div
@@ -207,11 +273,6 @@ export default function CheatPanel() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-4px); }
-        }
-        /* Hide scrollbars */
         .kowchi-tabs::-webkit-scrollbar,
         .kowchi-content::-webkit-scrollbar {
           display: none;
@@ -240,11 +301,6 @@ export default function CheatPanel() {
           background: ${colors.primary};
           cursor: pointer;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          transition: all 0.2s ease;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 2px 8px ${colors.primary}60;
         }
         input[type="range"]::-moz-range-thumb {
           width: 14px;
@@ -254,11 +310,6 @@ export default function CheatPanel() {
           cursor: pointer;
           border: none;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          transition: all 0.2s ease;
-        }
-        input[type="range"]::-moz-range-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 2px 8px ${colors.primary}60;
         }
         input[type="range"]::-moz-range-track {
           background: transparent;
@@ -289,10 +340,7 @@ export default function CheatPanel() {
           >
             {isMinimized ? "+" : "−"}
           </button>
-          <button
-            className="p-1.5 hover:opacity-70 transition-opacity"
-            style={{ color: colors.text }}
-          >
+          <button className="p-1.5 hover:opacity-70 transition-opacity" style={{ color: colors.text }}>
             ✕
           </button>
         </div>
@@ -321,12 +369,12 @@ export default function CheatPanel() {
               </button>
             ))}
             <button
-              onClick={() => setActiveTab("misc")}
+              onClick={() => setActiveTab("settings")}
               className="px-4 py-3 font-semibold ml-auto transition-all duration-300"
               style={{
-                color: activeTab === "misc" ? colors.primary : "rgba(241,245,249,0.5)",
-                borderBottom: activeTab === "misc" ? `2px solid ${colors.primary}` : "none",
-                backgroundColor: activeTab === "misc" ? `${colors.primary}10` : "transparent",
+                color: activeTab === "settings" ? colors.primary : "rgba(241,245,249,0.5)",
+                borderBottom: activeTab === "settings" ? `2px solid ${colors.primary}` : "none",
+                backgroundColor: activeTab === "settings" ? `${colors.primary}10` : "transparent",
               }}
             >
               ⚙
@@ -339,36 +387,13 @@ export default function CheatPanel() {
             className="kowchi-content"
             style={{ height: "400px", overflow: "auto" }}
           >
-            {activeTab === "misc" ? (
+            {activeTab === "settings" ? (
               <div className="p-5 h-full" style={{ backgroundColor: colors.background }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  {/* Panic Button */}
                   <button
                     onClick={() => {
-                      setToggledFeatures({});
-                      alert("PANIC ACTIVATED - All features disabled");
+                      fetch(`${API_URL}/reset`, { method: "POST" }).then(() => location.reload());
                     }}
-                    className="w-full transition-all duration-300 hover:opacity-90"
-                    style={{
-                      padding: "12px 16px",
-                      background: `linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)`,
-                      color: colors.text,
-                      border: `1.5px solid #991b1b`,
-                      borderRadius: "6px",
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      letterSpacing: "0.8px",
-                      textTransform: "uppercase",
-                      cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(220, 38, 38, 0.25)",
-                    }}
-                  >
-                    ⚠ PANIC
-                  </button>
-
-                  {/* Reset Theme Button */}
-                  <button
-                    onClick={resetTheme}
                     className="w-full transition-all duration-300 hover:opacity-90"
                     style={{
                       padding: "10px 16px",
@@ -378,26 +403,35 @@ export default function CheatPanel() {
                       borderRadius: "6px",
                       fontSize: "12px",
                       fontWeight: "600",
-                      letterSpacing: "0.6px",
-                      textTransform: "uppercase",
                       cursor: "pointer",
-                      boxShadow: `0 4px 12px ${colors.primary}40`,
+                    }}
+                  >
+                    ↻ Reset Config
+                  </button>
+                  <button
+                    onClick={resetTheme}
+                    className="w-full transition-all duration-300 hover:opacity-90"
+                    style={{
+                      padding: "10px 16px",
+                      background: `linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)`,
+                      color: colors.text,
+                      border: `1.5px solid #991b1b`,
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
                     }}
                   >
                     ↻ Reset Theme
                   </button>
-
-                  {/* Color Grid */}
                   <div>
-                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "14px", opacity: 0.8 }}>
-                      Theme System
+                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", marginBottom: "14px" }}>
+                      THEME SYSTEM
                     </h3>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                       {[
                         { key: "primary", label: "Primary", emoji: "⚡" },
                         { key: "background", label: "Background", emoji: "🌑" },
-                        { key: "surface", label: "Surface", emoji: "📦" },
-                        { key: "text", label: "Text", emoji: "✍️" },
                       ].map((item) => (
                         <div
                           key={item.key}
@@ -408,7 +442,6 @@ export default function CheatPanel() {
                             border: `1.5px solid ${colors[item.key as keyof typeof colors]}`,
                             borderRadius: "8px",
                             cursor: "pointer",
-                            position: "relative",
                           }}
                           onClick={() => {
                             const input = document.createElement("input");
@@ -420,102 +453,26 @@ export default function CheatPanel() {
                             input.click();
                           }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
-                            <span style={{ fontSize: "16px" }}>{item.emoji}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span>{item.emoji}</span>
                             <div>
                               <div style={{ fontSize: "11px", fontWeight: "700", color: colors.text }}>
                                 {item.label}
                               </div>
-                              <div
-                                style={{
-                                  fontSize: "9px",
-                                  fontFamily: "monospace",
-                                  color: "rgba(241,245,249,0.6)",
-                                  marginTop: "2px",
-                                }}
-                              >
-                                {colors[item.key as keyof typeof colors]}
-                              </div>
                             </div>
                           </div>
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "0",
-                              right: "0",
-                              width: "24px",
-                              height: "24px",
-                              backgroundColor: colors[item.key as keyof typeof colors],
-                              borderRadius: "8px 0 8px 0",
-                              border: `1px solid ${colors.border}`,
-                            }}
-                          />
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  {/* UI Settings */}
-                  <div>
-                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "12px", opacity: 0.8 }}>
-                      UI Settings
-                    </h3>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                      {[
-                        { label: "UI Font Size", id: "ui_font_size", min: 8, max: 24, default: 14 },
-                        { label: "UI Opacity", id: "ui_opacity", min: 20, max: 100, default: 100 },
-                      ].map((setting) => (
-                        <div key={setting.id}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                            <label style={{ fontSize: "12px", fontWeight: "600", color: "rgba(241,245,249,0.8)" }}>
-                              {setting.label}
-                            </label>
-                            <span style={{ fontSize: "11px", fontWeight: "700", color: colors.primary }}>
-                              {sliderValues[setting.id] ?? setting.default}{setting.id === "ui_font_size" ? "px" : "%"}
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min={setting.min}
-                            max={setting.max}
-                            value={sliderValues[setting.id] ?? setting.default}
-                            onChange={(e) => updateSliderValue(setting.id, parseInt(e.target.value))}
-                            style={{
-                              "--value": `${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%`,
-                            } as any}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Discord RPC */}
-                  <div>
-                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "12px", opacity: 0.8 }}>
-                      Discord RPC
-                    </h3>
-                    <input
-                      type="text"
-                      placeholder="Discord Status Text"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        backgroundColor: colors.surface,
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: "6px",
-                        color: colors.text,
-                        fontSize: "12px",
-                      }}
-                    />
                   </div>
                 </div>
               </div>
             ) : activeTabData ? (
               <div className="p-5 h-full" style={{ backgroundColor: colors.background }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  {activeTabData.features.map((feature) => {
-                    const isEnabled = toggledFeatures[feature.id] || false;
-                    const sliderValue = sliderValues[feature.id] ?? (feature.value || 0);
+                  {activeTabData.features.map((feature: any) => {
+                    const value = (config as any)[feature.id];
+                    const isToggle = feature.type === "toggle";
 
                     return (
                       <div
@@ -523,68 +480,63 @@ export default function CheatPanel() {
                         className="transition-all duration-300"
                         style={{
                           padding: "12px 14px",
-                          backgroundColor: isEnabled ? `${colors.primary}15` : colors.surface,
-                          border: `1px solid ${isEnabled ? colors.primary : colors.border}`,
+                          backgroundColor: isToggle && value ? `${colors.primary}15` : colors.surface,
+                          border: `1px solid ${isToggle && value ? colors.primary : colors.border}`,
                           borderRadius: "8px",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: feature.value !== undefined ? "8px" : "0" }}>
-                          <button
-                            onClick={() => toggleFeature(feature.id)}
-                            className="transition-all duration-300"
-                            style={{
-                              width: "18px",
-                              height: "18px",
-                              borderRadius: "4px",
-                              border: `2px solid ${colors.primary}`,
-                              backgroundColor: isEnabled ? colors.primary : "transparent",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            {isEnabled && (
-                              <span style={{ color: colors.background, fontSize: "12px", fontWeight: "bold" }}>✓</span>
-                            )}
-                          </button>
-                          <label
-                            className="transition-colors duration-300 cursor-pointer"
-                            style={{
-                              fontSize: "13px",
-                              fontWeight: "600",
-                              color: isEnabled ? colors.primary : colors.text,
-                            }}
-                          >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            marginBottom: feature.type === "slider" ? "8px" : "0",
+                          }}
+                        >
+                          {isToggle && (
+                            <button
+                              onClick={() => updateConfig(feature.id, !value)}
+                              style={{
+                                width: "18px",
+                                height: "18px",
+                                borderRadius: "4px",
+                                border: `2px solid ${colors.primary}`,
+                                backgroundColor: value ? colors.primary : "transparent",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {value && <span style={{ color: colors.background, fontSize: "12px" }}>✓</span>}
+                            </button>
+                          )}
+                          <label style={{ fontSize: "13px", fontWeight: "600", color: colors.text }}>
                             {feature.label}
                           </label>
+                          {feature.type === "slider" && (
+                            <span style={{ fontSize: "11px", color: colors.primary, marginLeft: "auto" }}>
+                              {typeof value === "number" ? value.toFixed(1) : value}
+                            </span>
+                          )}
                         </div>
 
-                        {feature.value !== undefined && (
-                          <div>
-                            <input
-                              type="range"
-                              min={feature.min || 0}
-                              max={feature.max || 100}
-                              value={sliderValue}
-                              onChange={(e) => updateSliderValue(feature.id, parseInt(e.target.value))}
-                              style={{
-                                "--value": `${((sliderValue - (feature.min || 0)) / ((feature.max || 100) - (feature.min || 0))) * 100}%`,
-                              } as any}
-                            />
-                            <div style={{ marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.5)" }}>
-                                {feature.min || 0}
-                              </span>
-                              <span style={{ fontSize: "12px", fontWeight: "600", color: colors.primary }}>
-                                {sliderValue}
-                              </span>
-                              <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.5)" }}>
-                                {feature.max || 100}
-                              </span>
-                            </div>
-                          </div>
+                        {feature.type === "slider" && (
+                          <input
+                            type="range"
+                            min={feature.min}
+                            max={feature.max}
+                            step={feature.step || 1}
+                            value={value || 0}
+                            onChange={(e) => {
+                              const numValue =
+                                feature.step && feature.step < 1 ? parseFloat(e.target.value) : parseInt(e.target.value);
+                              updateConfig(feature.id, numValue);
+                            }}
+                            style={{
+                              "--value": `${((value - feature.min) / (feature.max - feature.min)) * 100}%`,
+                            } as any}
+                          />
                         )}
                       </div>
                     );
@@ -598,15 +550,18 @@ export default function CheatPanel() {
 
       {/* Footer */}
       <div
-        className="px-5 py-3 flex justify-between text-xs"
         style={{
           borderTop: `1px solid ${colors.border}`,
           background: `linear-gradient(135deg, ${colors.primary}10 0%, transparent 100%)`,
           color: "rgba(241,245,249,0.5)",
+          padding: "12px 20px",
+          fontSize: "12px",
+          display: "flex",
+          justifyContent: "space-between",
         }}
       >
         <span>KOWCHI v1.0 (FREEDOM)</span>
-        <span>AI ENHANCED</span>
+        <span>CONNECTED</span>
       </div>
     </div>
   );
