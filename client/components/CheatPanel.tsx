@@ -211,6 +211,16 @@ export default function CheatPanel() {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-4px); }
         }
+        /* Hide scrollbars */
+        .kowchi-tabs::-webkit-scrollbar,
+        .kowchi-content::-webkit-scrollbar {
+          display: none;
+        }
+        .kowchi-tabs,
+        .kowchi-content {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
         input[type="range"] {
           width: 100%;
           height: 5px;
