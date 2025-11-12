@@ -302,7 +302,8 @@ export default function CheatPanel() {
         <>
           {/* Tabs */}
           <div
-            className="flex overflow-x-auto text-xs"
+            ref={tabsRef}
+            className="kowchi-tabs flex overflow-x-auto text-xs"
             style={{ borderBottom: `1px solid ${colors.border}` }}
           >
             {tabs.map((tab) => (
