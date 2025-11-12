@@ -15,6 +15,36 @@ interface Tab {
   features: Feature[];
 }
 
+const AnimeGirlLogo = ({ color }: { color: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Head */}
+    <circle cx="10" cy="7" r="4.5" fill={color} opacity="0.9" />
+    
+    {/* Hair */}
+    <path d="M 5.5 7 Q 5 4 10 3 Q 15 4 14.5 7" fill={color} />
+    
+    {/* Left Eye */}
+    <ellipse cx="8" cy="6.5" rx="1.2" ry="1.5" fill="#000" />
+    <circle cx="8.3" cy="6" r="0.4" fill="#fff" />
+    
+    {/* Right Eye */}
+    <ellipse cx="12" cy="6.5" rx="1.2" ry="1.5" fill="#000" />
+    <circle cx="12.3" cy="6" r="0.4" fill="#fff" />
+    
+    {/* Mouth */}
+    <path d="M 9.5 8.5 Q 10 9 10.5 8.5" stroke={color} strokeWidth="0.5" fill="none" />
+    
+    {/* Body */}
+    <rect x="7.5" y="11.5" width="5" height="5" fill={color} opacity="0.7" rx="1" />
+    
+    {/* Left Arm */}
+    <line x1="7.5" y1="12" x2="5" y2="14" stroke={color} strokeWidth="1" />
+    
+    {/* Right Arm */}
+    <line x1="12.5" y1="12" x2="15" y2="14" stroke={color} strokeWidth="1" />
+  </svg>
+);
+
 export default function CheatPanel() {
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const [isDragging, setIsDragging] = useState(false);
@@ -131,6 +161,60 @@ export default function CheatPanel() {
         overflow: "hidden",
       }}
     >
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
+        }
+        input[type="range"] {
+          width: 100%;
+          height: 5px;
+          border-radius: 3px;
+          background: linear-gradient(to right, ${colors.primary} 0%, ${colors.primary} var(--value), ${colors.border} var(--value), ${colors.border} 100%);
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+          cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: ${colors.primary};
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+          transform: scale(1.1);
+          box-shadow: 0 2px 8px ${colors.primary}60;
+        }
+        input[type="range"]::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: ${colors.primary};
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        input[type="range"]::-moz-range-thumb:hover {
+          transform: scale(1.1);
+          box-shadow: 0 2px 8px ${colors.primary}60;
+        }
+        input[type="range"]::-moz-range-track {
+          background: transparent;
+          border: none;
+        }
+      `}</style>
+
       {/* Header */}
       <div
         onMouseDown={handleMouseDown}
@@ -141,17 +225,9 @@ export default function CheatPanel() {
         }}
       >
         <div className="flex items-center gap-3">
-          <div
-            style={{
-              width: "8px",
-              height: "8px",
-              backgroundColor: colors.primary,
-              borderRadius: "50%",
-              animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-            }}
-          />
+          <AnimeGirlLogo color={colors.primary} />
           <h1 className="text-sm font-bold tracking-wider" style={{ color: colors.text }}>
-            OSU CHEAT
+            KOWCHI
           </h1>
         </div>
         <div className="flex gap-2">
@@ -209,33 +285,23 @@ export default function CheatPanel() {
           <div style={{ height: "400px", overflow: "hidden" }}>
             {activeTab === "misc" ? (
               <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.background }}>
-                <style>
-                  {`
-                    @keyframes pulse {
-                      0%, 100% { opacity: 1; }
-                      50% { opacity: 0.5; }
-                    }
-                    @keyframes float {
-                      0%, 100% { transform: translateY(0px); }
-                      50% { transform: translateY(-4px); }
-                    }
-                  `}
-                </style>
-
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                   {/* Panic Button */}
                   <button
                     onClick={() => alert("PANIC ACTIVATED - All features disabled")}
-                    className="w-full py-4 font-bold transition-all duration-300 hover:opacity-90 hover:scale-105"
+                    className="w-full transition-all duration-300 hover:opacity-90"
                     style={{
-                      background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
+                      padding: "12px 16px",
+                      background: `linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)`,
                       color: colors.text,
-                      border: `2px solid #7f1d1d`,
-                      borderRadius: "8px",
+                      border: `1.5px solid #991b1b`,
+                      borderRadius: "6px",
                       fontSize: "13px",
-                      letterSpacing: "1px",
-                      transform: "translateZ(0)",
-                      boxShadow: "0 0 20px rgba(220, 38, 38, 0.3)",
+                      fontWeight: "600",
+                      letterSpacing: "0.8px",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(220, 38, 38, 0.25)",
                     }}
                   >
                     ⚠ PANIC
@@ -335,48 +401,9 @@ export default function CheatPanel() {
                             value={sliderValues[setting.id] ?? setting.default}
                             onChange={(e) => updateSliderValue(setting.id, parseInt(e.target.value))}
                             style={{
-                              width: "100%",
-                              height: "5px",
-                              borderRadius: "3px",
-                              backgroundColor: colors.border,
-                              outline: "none",
-                              WebkitAppearance: "none" as any,
-                              appearance: "none",
-                              background: `linear-gradient(to right, ${colors.primary} 0%, ${colors.primary} ${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%, ${colors.border} ${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%, ${colors.border} 100%)`,
-                              cursor: "pointer",
+                              "--value": `${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%`,
                             } as any}
                           />
-                          <style>{`
-                            input[type="range"]::-webkit-slider-thumb {
-                              -webkit-appearance: none;
-                              appearance: none;
-                              width: 14px;
-                              height: 14px;
-                              border-radius: 50%;
-                              background: ${colors.primary};
-                              cursor: pointer;
-                              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-                              transition: all 0.2s ease;
-                            }
-                            input[type="range"]::-webkit-slider-thumb:hover {
-                              transform: scale(1.1);
-                              box-shadow: 0 2px 8px ${colors.primary}60;
-                            }
-                            input[type="range"]::-moz-range-thumb {
-                              width: 14px;
-                              height: 14px;
-                              border-radius: 50%;
-                              background: ${colors.primary};
-                              cursor: pointer;
-                              border: none;
-                              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-                              transition: all 0.2s ease;
-                            }
-                            input[type="range"]::-moz-range-thumb:hover {
-                              transform: scale(1.1);
-                              box-shadow: 0 2px 8px ${colors.primary}60;
-                            }
-                          `}</style>
                         </div>
                       ))}
                     </div>
@@ -442,48 +469,9 @@ export default function CheatPanel() {
                               value={sliderValue}
                               onChange={(e) => updateSliderValue(feature.id, parseInt(e.target.value))}
                               style={{
-                                width: "100%",
-                                height: "5px",
-                                borderRadius: "3px",
-                                backgroundColor: `${colors.border}`,
-                                outline: "none",
-                                WebkitAppearance: "none" as any,
-                                appearance: "none",
-                                background: `linear-gradient(to right, ${colors.primary} 0%, ${colors.primary} ${sliderValue}%, ${colors.border} ${sliderValue}%, ${colors.border} 100%)`,
-                                cursor: "pointer",
+                                "--value": `${((sliderValue - (feature.min || 0)) / ((feature.max || 100) - (feature.min || 0))) * 100}%`,
                               } as any}
                             />
-                            <style>{`
-                              input[type="range"]::-webkit-slider-thumb {
-                                -webkit-appearance: none;
-                                appearance: none;
-                                width: 14px;
-                                height: 14px;
-                                border-radius: 50%;
-                                background: ${colors.primary};
-                                cursor: pointer;
-                                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-                                transition: all 0.2s ease;
-                              }
-                              input[type="range"]::-webkit-slider-thumb:hover {
-                                transform: scale(1.1);
-                                box-shadow: 0 2px 8px ${colors.primary}60;
-                              }
-                              input[type="range"]::-moz-range-thumb {
-                                width: 14px;
-                                height: 14px;
-                                border-radius: 50%;
-                                background: ${colors.primary};
-                                cursor: pointer;
-                                border: none;
-                                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-                                transition: all 0.2s ease;
-                              }
-                              input[type="range"]::-moz-range-thumb:hover {
-                                transform: scale(1.1);
-                                box-shadow: 0 2px 8px ${colors.primary}60;
-                              }
-                            `}</style>
                             <div style={{ marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.5)" }}>
                                 {feature.min || 0}
@@ -516,7 +504,7 @@ export default function CheatPanel() {
           color: "rgba(241,245,249,0.5)",
         }}
       >
-        <span>OSU CHEAT v1.0</span>
+        <span>KOWCHI v1.0</span>
         <span>AI ENHANCED</span>
       </div>
     </div>
