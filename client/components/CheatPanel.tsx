@@ -5,9 +5,11 @@ interface Feature {
   label: string;
   enabled: boolean;
   value?: number;
+  min?: number;
+  max?: number;
 }
 
-interface Category {
+interface Tab {
   id: string;
   name: string;
   features: Feature[];
@@ -17,85 +19,66 @@ export default function CheatPanel() {
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [activeTab, setActiveTab] = useState("aimbot");
+  const [activeTab, setActiveTab] = useState("relax");
+  const [isMinimized, setIsMinimized] = useState(false);
+  
   const [colors, setColors] = useState({
-    bg: "#0f172a",
-    accent: "#06b6d4",
+    primary: "#3b82f6",
+    secondary: "#1e40af",
+    background: "#0f172a",
+    surface: "#1e293b",
     border: "#334155",
-    text: "#ffffff",
+    text: "#f1f5f9",
+    accent: "#06b6d4",
   });
+
+  const [toggledFeatures, setToggledFeatures] = useState<Record<string, boolean>>({});
+  const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
+  
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const [categories] = useState<Category[]>([
+  const tabs: Tab[] = [
+    {
+      id: "relax",
+      name: "Relax",
+      features: [
+        { id: "auto_click", label: "Auto Click", enabled: false, value: 50, min: 1, max: 100 },
+        { id: "click_assist", label: "Click Assist", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "stream_assist", label: "Stream Assist", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "jump_assist", label: "Jump Assist", enabled: false, value: 50, min: 0, max: 100 },
+      ],
+    },
     {
       id: "aimbot",
       name: "Aimbot",
       features: [
-        { id: "aimbot", label: "Aimbot", enabled: false, value: 50 },
-        { id: "aim_fov", label: "Aim FOV", enabled: false, value: 90 },
-        { id: "aim_smooth", label: "Aim Smoothing", enabled: false, value: 50 },
-        { id: "aim_bone", label: "Aim Bone Select", enabled: false, value: 0 },
-        { id: "visibility_check", label: "Visibility Check", enabled: false },
-        { id: "lock_when_firing", label: "Lock When Firing", enabled: false },
+        { id: "aim_assist", label: "Aim Assist", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "cursor_snap", label: "Cursor Snap", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "smooth_aim", label: "Smooth Aim", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "prediction", label: "Prediction", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
-      id: "esp",
-      name: "ESP",
+      id: "difficulty",
+      name: "Difficulty",
       features: [
-        { id: "esp", label: "ESP Enable", enabled: false },
-        { id: "wallhack", label: "Wallhack", enabled: false },
-        { id: "distance_esp", label: "Distance ESP", enabled: false, value: 1000 },
-        { id: "health_bar", label: "Health Bar", enabled: false },
-        { id: "skeleton", label: "Skeleton ESP", enabled: false },
-        { id: "box_esp", label: "Box ESP", enabled: false },
+        { id: "cs_mod", label: "Circle Size", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "ar_mod", label: "Approach Rate", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "od_mod", label: "Overall Difficulty", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "hp_mod", label: "Health Points", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
-      id: "recoil",
-      name: "Recoil",
+      id: "replay",
+      name: "Replay",
       features: [
-        { id: "no_recoil", label: "No Recoil", enabled: false, value: 100 },
-        { id: "no_spread", label: "No Spread", enabled: false, value: 100 },
-        { id: "auto_fire", label: "Auto Fire", enabled: false },
-        { id: "rapid_fire", label: "Rapid Fire", enabled: false, value: 50 },
-        { id: "bullet_penetration", label: "Bullet Penetration", enabled: false },
+        { id: "auto_replay", label: "Auto Replay", enabled: false },
+        { id: "replay_speed", label: "Replay Speed", enabled: false, value: 50, min: 1, max: 200 },
+        { id: "frame_skip", label: "Frame Skip", enabled: false, value: 50, min: 0, max: 100 },
+        { id: "pause_anywhere", label: "Pause Anywhere", enabled: false },
       ],
     },
-    {
-      id: "movement",
-      name: "Movement",
-      features: [
-        { id: "bunny_hop", label: "Bunny Hop", enabled: false },
-        { id: "crouch_cancel", label: "Crouch Cancel", enabled: false },
-        { id: "speed_boost", label: "Speed Boost", enabled: false, value: 50 },
-        { id: "jump_height", label: "Jump Height", enabled: false, value: 50 },
-        { id: "slide_cancel", label: "Slide Cancel", enabled: false },
-        { id: "dolphin_dive", label: "Dolphin Dive", enabled: false },
-      ],
-    },
-    {
-      id: "visual",
-      name: "Visual",
-      features: [
-        { id: "kill_effects", label: "Kill Effects", enabled: false },
-        { id: "blood_effects", label: "Blood Effects", enabled: false },
-        { id: "neon_glow", label: "Neon Glow", enabled: false },
-        { id: "tracers", label: "Tracers", enabled: false },
-        { id: "custom_camo", label: "Custom Camo", enabled: false },
-      ],
-    },
-    {
-      id: "sensitivity",
-      name: "Sensitivity",
-      features: [
-        { id: "aim_sense", label: "ADS Sensitivity", enabled: false, value: 50 },
-        { id: "regular_sense", label: "Regular Sensitivity", enabled: false, value: 50 },
-        { id: "aim_assist", label: "Aim Assist Strength", enabled: false, value: 50 },
-        { id: "deadzone", label: "Deadzone", enabled: false, value: 5 },
-      ],
-    },
-  ]);
+  ];
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input")) return;
@@ -123,225 +106,324 @@ export default function CheatPanel() {
     };
   }, [isDragging, dragOffset]);
 
-  const activeCategory = categories.find((cat) => cat.id === activeTab);
+  const toggleFeature = (featureId: string) => {
+    setToggledFeatures(prev => ({
+      ...prev,
+      [featureId]: !prev[featureId]
+    }));
+  };
+
+  const updateSliderValue = (featureId: string, value: number) => {
+    setSliderValues(prev => ({
+      ...prev,
+      [featureId]: value
+    }));
+  };
+
+  const activeTabData = tabs.find(t => t.id === activeTab);
 
   return (
     <div
       ref={panelRef}
-      className="fixed z-50"
+      className="fixed z-50 transition-all duration-300"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: "1000px",
-        backgroundColor: colors.bg,
+        width: "420px",
+        backgroundColor: colors.background,
         border: `1px solid ${colors.border}`,
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+        boxShadow: `0 20px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 2px ${colors.primary}20`,
+        borderRadius: "12px",
+        overflow: "hidden",
       }}
     >
       {/* Header */}
       <div
         onMouseDown={handleMouseDown}
-        className="px-6 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
+        className="px-5 py-4 flex items-center justify-between cursor-grab active:cursor-grabbing"
         style={{
+          background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.secondary}10 100%)`,
           borderBottom: `1px solid ${colors.border}`,
-          backgroundColor: colors.bg,
         }}
       >
-        <div className="flex items-center gap-2">
-          <div style={{ width: "3px", height: "3px", backgroundColor: colors.accent }} />
-          <h1 className="text-base font-bold" style={{ color: colors.text }}>
-            BRYAN GUI
+        <div className="flex items-center gap-3">
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              backgroundColor: colors.primary,
+              borderRadius: "50%",
+              animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            }}
+          />
+          <h1 className="text-sm font-bold tracking-wider" style={{ color: colors.text }}>
+            OSU CHEAT
           </h1>
         </div>
-        <div className="flex gap-1">
-          <button className="px-2 py-1 text-xs hover:opacity-70 transition-opacity" style={{ color: colors.text }}>
-            _
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="p-1.5 hover:opacity-70 transition-opacity"
+            style={{ color: colors.text }}
+          >
+            {isMinimized ? "+" : "−"}
           </button>
-          <button className="px-2 py-1 text-xs hover:opacity-70 transition-opacity" style={{ color: colors.text }}>
-            X
+          <button
+            className="p-1.5 hover:opacity-70 transition-opacity"
+            style={{ color: colors.text }}
+          >
+            ✕
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div
-        className="flex overflow-x-auto text-xs"
-        style={{ borderBottom: `1px solid ${colors.border}` }}
-      >
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveTab(cat.id)}
-            className="px-4 py-2 font-semibold transition-colors"
-            style={{
-              color: activeTab === cat.id ? colors.accent : "rgba(255,255,255,0.5)",
-              borderBottom: activeTab === cat.id ? `2px solid ${colors.accent}` : "none",
-              backgroundColor: activeTab === cat.id ? `${colors.accent}10` : "transparent",
-            }}
+      {!isMinimized && (
+        <>
+          {/* Tabs */}
+          <div
+            className="flex overflow-x-auto text-xs"
+            style={{ borderBottom: `1px solid ${colors.border}` }}
           >
-            {cat.name}
-          </button>
-        ))}
-        <button
-          onClick={() => setActiveTab("settings")}
-          className="px-4 py-2 font-semibold ml-auto transition-colors"
-          style={{
-            color: activeTab === "settings" ? colors.accent : "rgba(255,255,255,0.5)",
-            borderBottom: activeTab === "settings" ? `2px solid ${colors.accent}` : "none",
-            backgroundColor: activeTab === "settings" ? `${colors.accent}10` : "transparent",
-          }}
-        >
-          ⚙ GUI
-        </button>
-      </div>
-
-      {/* Content */}
-      <div style={{ height: "450px", overflow: "hidden" }}>
-        {activeTab === "settings" ? (
-          <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.bg }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              {/* Panic Button */}
-              <div style={{ gridColumn: "1 / -1" }}>
-                <button
-                  onClick={() => alert("PANIC ACTIVATED")}
-                  className="w-full py-3 font-bold transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: "#dc2626",
-                    color: colors.text,
-                    border: `1px solid #991b1b`,
-                    fontSize: "14px",
-                  }}
-                >
-                  ⚠ PANIC BUTTON
-                </button>
-              </div>
-
-              {/* Color Pickers */}
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", marginBottom: "6px", color: colors.text }}>
-                  Main Color
-                </label>
-                <input
-                  type="color"
-                  value={colors.accent}
-                  onChange={(e) => setColors({ ...colors, accent: e.target.value })}
-                  style={{
-                    width: "100%",
-                    height: "32px",
-                    border: `1px solid ${colors.border}`,
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", marginBottom: "6px", color: colors.text }}>
-                  Background
-                </label>
-                <input
-                  type="color"
-                  value={colors.bg}
-                  onChange={(e) => setColors({ ...colors, bg: e.target.value })}
-                  style={{
-                    width: "100%",
-                    height: "32px",
-                    border: `1px solid ${colors.border}`,
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", marginBottom: "6px", color: colors.text }}>
-                  Border Color
-                </label>
-                <input
-                  type="color"
-                  value={colors.border}
-                  onChange={(e) => setColors({ ...colors, border: e.target.value })}
-                  style={{
-                    width: "100%",
-                    height: "32px",
-                    border: `1px solid ${colors.border}`,
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", marginBottom: "6px", color: colors.text }}>
-                  Text Color
-                </label>
-                <input
-                  type="color"
-                  value={colors.text}
-                  onChange={(e) => setColors({ ...colors, text: e.target.value })}
-                  style={{
-                    width: "100%",
-                    height: "32px",
-                    border: `1px solid ${colors.border}`,
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-            </div>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="px-4 py-3 font-semibold transition-all duration-300"
+                style={{
+                  color: activeTab === tab.id ? colors.primary : "rgba(241,245,249,0.5)",
+                  borderBottom: activeTab === tab.id ? `2px solid ${colors.primary}` : "none",
+                  backgroundColor: activeTab === tab.id ? `${colors.primary}10` : "transparent",
+                }}
+              >
+                {tab.name}
+              </button>
+            ))}
+            <button
+              onClick={() => setActiveTab("misc")}
+              className="px-4 py-3 font-semibold ml-auto transition-all duration-300"
+              style={{
+                color: activeTab === "misc" ? colors.primary : "rgba(241,245,249,0.5)",
+                borderBottom: activeTab === "misc" ? `2px solid ${colors.primary}` : "none",
+                backgroundColor: activeTab === "misc" ? `${colors.primary}10` : "transparent",
+              }}
+            >
+              ⚙
+            </button>
           </div>
-        ) : activeCategory ? (
-          <div className="p-4 h-full overflow-y-auto" style={{ backgroundColor: colors.bg }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              {activeCategory.features.map((feat) => (
-                <div
-                  key={feat.id}
-                  style={{
-                    padding: "8px",
-                    border: `1px solid ${colors.border}`,
-                    backgroundColor: feat.enabled ? `${colors.accent}15` : "transparent",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                    <input
-                      type="checkbox"
-                      checked={feat.enabled}
-                      onChange={() => {}}
-                      style={{
-                        width: "14px",
-                        height: "14px",
-                        cursor: "pointer",
-                        accentColor: colors.accent,
-                      }}
-                    />
-                    <label style={{ fontSize: "12px", fontWeight: "600", color: colors.text, cursor: "pointer" }}>
-                      {feat.label}
-                    </label>
+
+          {/* Content */}
+          <div style={{ height: "400px", overflow: "hidden" }}>
+            {activeTab === "misc" ? (
+              <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.background }}>
+                <style>
+                  {`
+                    @keyframes pulse {
+                      0%, 100% { opacity: 1; }
+                      50% { opacity: 0.5; }
+                    }
+                  `}
+                </style>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Panic Button */}
+                  <button
+                    onClick={() => alert("PANIC ACTIVATED - All features disabled")}
+                    className="w-full py-3 font-bold transition-all duration-300 hover:opacity-90"
+                    style={{
+                      background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
+                      color: colors.text,
+                      border: `2px solid #7f1d1d`,
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    ⚠ PANIC
+                  </button>
+
+                  {/* Color Pickers */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <h3 style={{ color: colors.text, fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>
+                      UI Colors
+                    </h3>
+
+                    {[
+                      { key: "primary", label: "Primary" },
+                      { key: "background", label: "Background" },
+                      { key: "surface", label: "Surface" },
+                      { key: "text", label: "Text" },
+                    ].map((item) => (
+                      <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <label style={{ fontSize: "12px", color: "rgba(241,245,249,0.7)", minWidth: "70px" }}>
+                          {item.label}
+                        </label>
+                        <input
+                          type="color"
+                          value={colors[item.key as keyof typeof colors]}
+                          onChange={(e) => setColors({ ...colors, [item.key]: e.target.value })}
+                          style={{
+                            width: "40px",
+                            height: "32px",
+                            border: `1px solid ${colors.border}`,
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                        />
+                        <input
+                          type="text"
+                          value={colors[item.key as keyof typeof colors]}
+                          onChange={(e) => setColors({ ...colors, [item.key]: e.target.value })}
+                          style={{
+                            flex: 1,
+                            padding: "6px 10px",
+                            fontSize: "12px",
+                            backgroundColor: colors.surface,
+                            color: colors.text,
+                            border: `1px solid ${colors.border}`,
+                            borderRadius: "6px",
+                            fontFamily: "monospace",
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  {feat.value !== undefined && (
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      defaultValue={feat.value}
-                      style={{
-                        width: "100%",
-                        height: "4px",
-                        cursor: "pointer",
-                        accentColor: colors.accent,
-                      }}
-                    />
-                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : activeTabData ? (
+              <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.background }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  {activeTabData.features.map((feature) => {
+                    const isEnabled = toggledFeatures[feature.id] || false;
+                    const sliderValue = sliderValues[feature.id] ?? (feature.value || 0);
+
+                    return (
+                      <div
+                        key={feature.id}
+                        className="transition-all duration-300"
+                        style={{
+                          padding: "12px 14px",
+                          backgroundColor: isEnabled ? `${colors.primary}15` : colors.surface,
+                          border: `1px solid ${isEnabled ? colors.primary : colors.border}`,
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                          <button
+                            onClick={() => toggleFeature(feature.id)}
+                            className="transition-all duration-300"
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              borderRadius: "4px",
+                              border: `2px solid ${colors.primary}`,
+                              backgroundColor: isEnabled ? colors.primary : "transparent",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {isEnabled && (
+                              <span style={{ color: colors.background, fontSize: "12px", fontWeight: "bold" }}>✓</span>
+                            )}
+                          </button>
+                          <label
+                            className="transition-colors duration-300 cursor-pointer"
+                            style={{
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              color: isEnabled ? colors.primary : colors.text,
+                            }}
+                          >
+                            {feature.label}
+                          </label>
+                        </div>
+
+                        {feature.value !== undefined && (
+                          <div>
+                            <input
+                              type="range"
+                              min={feature.min || 0}
+                              max={feature.max || 100}
+                              value={sliderValue}
+                              onChange={(e) => updateSliderValue(feature.id, parseInt(e.target.value))}
+                              style={{
+                                width: "100%",
+                                height: "5px",
+                                borderRadius: "3px",
+                                backgroundColor: `${colors.border}`,
+                                outline: "none",
+                                WebkitAppearance: "none" as any,
+                                appearance: "none",
+                                background: `linear-gradient(to right, ${colors.primary} 0%, ${colors.primary} ${sliderValue}%, ${colors.border} ${sliderValue}%, ${colors.border} 100%)`,
+                                cursor: "pointer",
+                              } as any}
+                            />
+                            <style>{`
+                              input[type="range"]::-webkit-slider-thumb {
+                                -webkit-appearance: none;
+                                appearance: none;
+                                width: 14px;
+                                height: 14px;
+                                border-radius: 50%;
+                                background: ${colors.primary};
+                                cursor: pointer;
+                                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                                transition: all 0.2s ease;
+                              }
+                              input[type="range"]::-webkit-slider-thumb:hover {
+                                transform: scale(1.1);
+                                box-shadow: 0 2px 8px ${colors.primary}60;
+                              }
+                              input[type="range"]::-moz-range-thumb {
+                                width: 14px;
+                                height: 14px;
+                                border-radius: 50%;
+                                background: ${colors.primary};
+                                cursor: pointer;
+                                border: none;
+                                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                                transition: all 0.2s ease;
+                              }
+                              input[type="range"]::-moz-range-thumb:hover {
+                                transform: scale(1.1);
+                                box-shadow: 0 2px 8px ${colors.primary}60;
+                              }
+                            `}</style>
+                            <div style={{ marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.5)" }}>
+                                {feature.min || 0}
+                              </span>
+                              <span style={{ fontSize: "12px", fontWeight: "600", color: colors.primary }}>
+                                {sliderValue}
+                              </span>
+                              <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.5)" }}>
+                                {feature.max || 100}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
+        </>
+      )}
 
       {/* Footer */}
       <div
-        className="px-6 py-2 flex justify-between text-xs"
+        className="px-5 py-3 flex justify-between text-xs"
         style={{
           borderTop: `1px solid ${colors.border}`,
-          color: "rgba(255,255,255,0.5)",
+          background: `linear-gradient(135deg, ${colors.primary}10 0%, transparent 100%)`,
+          color: "rgba(241,245,249,0.5)",
         }}
       >
-        <span>Advanced Cheats v2.0</span>
-        <span>BRYAN</span>
+        <span>OSU CHEAT v1.0</span>
+        <span>AI ENHANCED</span>
       </div>
     </div>
   );
