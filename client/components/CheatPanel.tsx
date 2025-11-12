@@ -511,7 +511,7 @@ export default function CheatPanel() {
                 </div>
               </div>
             ) : activeTabData ? (
-              <div className="p-5 h-full overflow-y-auto" style={{ backgroundColor: colors.background }}>
+              <div className="p-5 h-full" style={{ backgroundColor: colors.background }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                   {activeTabData.features.map((feature) => {
                     const isEnabled = toggledFeatures[feature.id] || false;
