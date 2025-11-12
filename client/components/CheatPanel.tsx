@@ -44,8 +44,6 @@ export default function CheatPanel() {
       features: [
         { id: "auto_click", label: "Auto Click", enabled: false, value: 50, min: 1, max: 100 },
         { id: "click_assist", label: "Click Assist", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "stream_assist", label: "Stream Assist", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "jump_assist", label: "Jump Assist", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
@@ -53,9 +51,7 @@ export default function CheatPanel() {
       name: "Aimbot",
       features: [
         { id: "aim_assist", label: "Aim Assist", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "cursor_snap", label: "Cursor Snap", enabled: false, value: 50, min: 0, max: 100 },
         { id: "smooth_aim", label: "Smooth Aim", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "prediction", label: "Prediction", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
@@ -64,8 +60,6 @@ export default function CheatPanel() {
       features: [
         { id: "cs_mod", label: "Circle Size", enabled: false, value: 50, min: 0, max: 100 },
         { id: "ar_mod", label: "Approach Rate", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "od_mod", label: "Overall Difficulty", enabled: false, value: 50, min: 0, max: 100 },
-        { id: "hp_mod", label: "Health Points", enabled: false, value: 50, min: 0, max: 100 },
       ],
     },
     {
@@ -221,71 +215,171 @@ export default function CheatPanel() {
                       0%, 100% { opacity: 1; }
                       50% { opacity: 0.5; }
                     }
+                    @keyframes float {
+                      0%, 100% { transform: translateY(0px); }
+                      50% { transform: translateY(-4px); }
+                    }
                   `}
                 </style>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                   {/* Panic Button */}
                   <button
                     onClick={() => alert("PANIC ACTIVATED - All features disabled")}
-                    className="w-full py-3 font-bold transition-all duration-300 hover:opacity-90"
+                    className="w-full py-4 font-bold transition-all duration-300 hover:opacity-90 hover:scale-105"
                     style={{
                       background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
                       color: colors.text,
                       border: `2px solid #7f1d1d`,
                       borderRadius: "8px",
                       fontSize: "13px",
-                      letterSpacing: "0.5px",
+                      letterSpacing: "1px",
+                      transform: "translateZ(0)",
+                      boxShadow: "0 0 20px rgba(220, 38, 38, 0.3)",
                     }}
                   >
                     ⚠ PANIC
                   </button>
 
-                  {/* Color Pickers */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <h3 style={{ color: colors.text, fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>
-                      UI Colors
+                  {/* Color Grid */}
+                  <div>
+                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "14px", opacity: 0.8 }}>
+                      Theme System
                     </h3>
-
-                    {[
-                      { key: "primary", label: "Primary" },
-                      { key: "background", label: "Background" },
-                      { key: "surface", label: "Surface" },
-                      { key: "text", label: "Text" },
-                    ].map((item) => (
-                      <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <label style={{ fontSize: "12px", color: "rgba(241,245,249,0.7)", minWidth: "70px" }}>
-                          {item.label}
-                        </label>
-                        <input
-                          type="color"
-                          value={colors[item.key as keyof typeof colors]}
-                          onChange={(e) => setColors({ ...colors, [item.key]: e.target.value })}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                      {[
+                        { key: "primary", label: "Primary", emoji: "⚡" },
+                        { key: "background", label: "Background", emoji: "🌑" },
+                        { key: "surface", label: "Surface", emoji: "📦" },
+                        { key: "text", label: "Text", emoji: "✍️" },
+                      ].map((item) => (
+                        <div
+                          key={item.key}
+                          className="transition-all duration-300 hover:scale-105"
                           style={{
-                            width: "40px",
-                            height: "32px",
-                            border: `1px solid ${colors.border}`,
-                            borderRadius: "6px",
+                            padding: "12px",
+                            backgroundColor: `${colors[item.key as keyof typeof colors]}25`,
+                            border: `1.5px solid ${colors[item.key as keyof typeof colors]}`,
+                            borderRadius: "8px",
                             cursor: "pointer",
+                            position: "relative",
                           }}
-                        />
-                        <input
-                          type="text"
-                          value={colors[item.key as keyof typeof colors]}
-                          onChange={(e) => setColors({ ...colors, [item.key]: e.target.value })}
-                          style={{
-                            flex: 1,
-                            padding: "6px 10px",
-                            fontSize: "12px",
-                            backgroundColor: colors.surface,
-                            color: colors.text,
-                            border: `1px solid ${colors.border}`,
-                            borderRadius: "6px",
-                            fontFamily: "monospace",
+                          onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "color";
+                            input.value = colors[item.key as keyof typeof colors];
+                            input.onchange = (e: any) => {
+                              setColors({ ...colors, [item.key]: e.target.value });
+                            };
+                            input.click();
                           }}
-                        />
-                      </div>
-                    ))}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
+                            <span style={{ fontSize: "16px" }}>{item.emoji}</span>
+                            <div>
+                              <div style={{ fontSize: "11px", fontWeight: "700", color: colors.text }}>
+                                {item.label}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "9px",
+                                  fontFamily: "monospace",
+                                  color: "rgba(241,245,249,0.6)",
+                                  marginTop: "2px",
+                                }}
+                              >
+                                {colors[item.key as keyof typeof colors]}
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              width: "24px",
+                              height: "24px",
+                              backgroundColor: colors[item.key as keyof typeof colors],
+                              borderRadius: "8px 0 8px 0",
+                              border: `1px solid ${colors.border}`,
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Advanced Settings */}
+                  <div>
+                    <h3 style={{ color: colors.text, fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "12px", opacity: 0.8 }}>
+                      Customization
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      {[
+                        { label: "UI Opacity", id: "ui_opacity", min: 20, max: 100, default: 100 },
+                        { label: "Animation Speed", id: "anim_speed", min: 50, max: 200, default: 100 },
+                      ].map((setting) => (
+                        <div key={setting.id}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                            <label style={{ fontSize: "12px", fontWeight: "600", color: "rgba(241,245,249,0.8)" }}>
+                              {setting.label}
+                            </label>
+                            <span style={{ fontSize: "11px", fontWeight: "700", color: colors.primary }}>
+                              {sliderValues[setting.id] ?? setting.default}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min={setting.min}
+                            max={setting.max}
+                            value={sliderValues[setting.id] ?? setting.default}
+                            onChange={(e) => updateSliderValue(setting.id, parseInt(e.target.value))}
+                            style={{
+                              width: "100%",
+                              height: "5px",
+                              borderRadius: "3px",
+                              backgroundColor: colors.border,
+                              outline: "none",
+                              WebkitAppearance: "none" as any,
+                              appearance: "none",
+                              background: `linear-gradient(to right, ${colors.primary} 0%, ${colors.primary} ${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%, ${colors.border} ${((sliderValues[setting.id] ?? setting.default) - setting.min) / (setting.max - setting.min) * 100}%, ${colors.border} 100%)`,
+                              cursor: "pointer",
+                            } as any}
+                          />
+                          <style>{`
+                            input[type="range"]::-webkit-slider-thumb {
+                              -webkit-appearance: none;
+                              appearance: none;
+                              width: 14px;
+                              height: 14px;
+                              border-radius: 50%;
+                              background: ${colors.primary};
+                              cursor: pointer;
+                              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                              transition: all 0.2s ease;
+                            }
+                            input[type="range"]::-webkit-slider-thumb:hover {
+                              transform: scale(1.1);
+                              box-shadow: 0 2px 8px ${colors.primary}60;
+                            }
+                            input[type="range"]::-moz-range-thumb {
+                              width: 14px;
+                              height: 14px;
+                              border-radius: 50%;
+                              background: ${colors.primary};
+                              cursor: pointer;
+                              border: none;
+                              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                              transition: all 0.2s ease;
+                            }
+                            input[type="range"]::-moz-range-thumb:hover {
+                              transform: scale(1.1);
+                              box-shadow: 0 2px 8px ${colors.primary}60;
+                            }
+                          `}</style>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
